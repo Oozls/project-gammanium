@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}로그인 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     LOGIN PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container container-sm">
+
+    <!-- Form card -->
+    <div class="card" style="max-width: 480px; margin-left: auto; margin-right: auto;">
+
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: var(--space-8);">
+        <h2 style="margin-bottom: var(--space-2);">로그인</h2>
+        <p class="text-sm">청원고 사제동행 런닝 프로그램에 접속하세요</p>
+      </div>
+
+      <!-- Form -->
+      <form method="POST" style="display: flex; flex-direction: column; gap: var(--space-6);">
+
+        <!-- Username field -->
+        <div class="form-group">
+          <label class="form-label required">사용자명</label>
+          <input
+            type="text"
+            name="username"
+            class="form-input"
+            placeholder="사용자명"
+            required
+          />
+        </div>
+
+        <!-- Password field -->
+        <div class="form-group">
+          <label class="form-label required">비밀번호</label>
+          <input
+            type="password"
+            name="password"
+            class="form-input"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <!-- Remember + Forgot -->
+        <div class="flex items-center justify-between gap-4" style="font-size: var(--font-size-sm);">
+          <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+            <input type="checkbox" name="remember_me" style="width: 18px; height: 18px; cursor: pointer;" />
+            <span>로그인 상태 유지</span>
+          </label>
+          <a href="#" style="color: var(--color-primary); text-decoration: none;">
+            비밀번호 찾기
+          </a>
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary btn-lg btn-full">
+          <i data-feather="log-in"></i>
+          로그인하기
+        </button>
+
+      </form>
+
+      <!-- Divider -->
+      <div style="margin: var(--space-6) 0; display: flex; align-items: center; gap: var(--space-4);">
+        <div style="flex: 1; height: 1px; background-color: var(--color-border);"></div>
+        <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">또는</span>
+        <div style="flex: 1; height: 1px; background-color: var(--color-border);"></div>
+      </div>
+
+      <!-- Sign up link -->
+      <div style="text-align: center;">
+        <p class="text-sm" style="margin-bottom: var(--space-4);">
+          계정이 없으신가요?
+        </p>
+        <a href="/signup" class="btn btn-secondary btn-lg btn-full">
+          <i data-feather="user-plus"></i>
+          회원가입하기
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

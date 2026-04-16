@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}회원가입 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     SIGNUP PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container container-sm">
+
+    <!-- Form card -->
+    <div class="card" style="max-width: 540px; margin-left: auto; margin-right: auto;">
+
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: var(--space-8);">
+        <h2 style="margin-bottom: var(--space-2);">회원가입</h2>
+        <p class="text-sm">청원고 사제동행 런닝 프로그램에 함께하세요</p>
+      </div>
+
+      <!-- Form -->
+      <form method="POST" style="display: flex; flex-direction: column; gap: var(--space-5);">
+
+        <!-- Username field -->
+        <div class="form-group">
+          <label class="form-label required">사용자명</label>
+          <input
+            type="text"
+            name="username"
+            class="form-input"
+            placeholder="username"
+            required
+          />
+          <p class="form-hint">3-20자의 영문, 숫자, 언더스코어 사용 가능</p>
+        </div>
+
+        <!-- Email field -->
+        <div class="form-group">
+          <label class="form-label required">이메일</label>
+          <input
+            type="email"
+            name="email"
+            class="form-input"
+            placeholder="name@example.com"
+            required
+          />
+        </div>
+
+        <!-- Password field -->
+        <div class="form-group">
+          <label class="form-label required">비밀번호</label>
+          <input
+            type="password"
+            name="password"
+            class="form-input"
+            placeholder="••••••••"
+            required
+          />
+          <p class="form-hint">최소 8자 이상</p>
+        </div>
+
+        <!-- Confirm Password field -->
+        <div class="form-group">
+          <label class="form-label required">비밀번호 확인</label>
+          <input
+            type="password"
+            name="password_confirm"
+            class="form-input"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <!-- Terms checkbox -->
+        <div style="background-color: var(--color-surface-warm); padding: var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+          <label style="display: flex; align-items: flex-start; gap: var(--space-3); cursor: pointer;">
+            <input
+              type="checkbox"
+              name="terms_agreed"
+              style="width: 18px; height: 18px; cursor: pointer; margin-top: 2px; flex-shrink: 0;"
+            />
+            <span class="text-sm">
+              <a href="#" style="color: var(--color-primary);">이용약관</a>과
+              <a href="#" style="color: var(--color-primary);">개인정보처리방침</a>에 동의합니다
+            </span>
+          </label>
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary btn-lg btn-full">
+          <i data-feather="user-plus"></i>
+          가입하기
+        </button>
+
+      </form>
+
+      <!-- Divider -->
+      <div style="margin: var(--space-6) 0; display: flex; align-items: center; gap: var(--space-4);">
+        <div style="flex: 1; height: 1px; background-color: var(--color-border);"></div>
+        <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">또는</span>
+        <div style="flex: 1; height: 1px; background-color: var(--color-border);"></div>
+      </div>
+
+      <!-- Login link -->
+      <div style="text-align: center;">
+        <p class="text-sm" style="margin-bottom: var(--space-4);">
+          이미 계정이 있으신가요?
+        </p>
+        <a href="/login" class="btn btn-ghost btn-lg btn-full">
+          <i data-feather="log-in"></i>
+          로그인하기
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

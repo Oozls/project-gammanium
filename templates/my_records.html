@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}내 기록 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     MY RECORDS PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container">
+
+    <!-- Header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-8); margin-bottom: var(--space-12); flex-wrap: wrap;">
+      <div>
+        <h1 style="margin-bottom: var(--space-2);">내 기록</h1>
+        <p class="text-md" style="color: var(--color-text-secondary);">
+          제출한 런닝 기록을 확인하고 상세 내용을 볼 수 있습니다
+        </p>
+      </div>
+
+      <!-- Filter/Sort buttons -->
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+        <div class="form-select-wrapper">
+          <select id="status-filter" class="form-select" style="min-width: 160px;">
+            <option value="">모든 상태</option>
+            <option value="pending">대기 중</option>
+            <option value="approved">승인됨</option>
+            <option value="rejected">거절됨</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="grid grid-cols-3 gap-6" style="margin-bottom: var(--space-8);">
+
+      <!-- Pending card -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon">
+            <i data-feather="clock"></i>
+          </div>
+          <div>
+            <h3 class="card-title">대기 중</h3>
+          </div>
+        </div>
+        <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+          {{ stats.pending }}
+        </div>
+        <p class="text-sm" style="color: var(--color-text-secondary); margin-top: var(--space-2);">검토 중인 기록</p>
+      </div>
+
+      <!-- Approved card -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon card-icon-orange">
+            <i data-feather="check-circle"></i>
+          </div>
+          <div>
+            <h3 class="card-title">승인됨</h3>
+          </div>
+        </div>
+        <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-success);">
+          {{ stats.approved }}
+        </div>
+        <p class="text-sm" style="color: var(--color-text-secondary); margin-top: var(--space-2);">승인된 기록</p>
+      </div>
+
+      <!-- Rejected card -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon" style="background-color: #FFF0F0; color: var(--color-error); border-color: #FFD9D9;">
+            <i data-feather="x-circle"></i>
+          </div>
+          <div>
+            <h3 class="card-title">거절됨</h3>
+          </div>
+        </div>
+        <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-error);">
+          {{ stats.rejected }}
+        </div>
+        <p class="text-sm" style="color: var(--color-text-secondary); margin-top: var(--space-2);">거절된 기록</p>
+      </div>
+
+    </div>
+
+    <!-- Records list -->
+    <div>
+      <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">등록 기록</h3>
+
+      <!-- Table wrapper -->
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+
+          <!-- Table header -->
+          <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+              <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                거리
+              </th>
+              <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                날짜
+              </th>
+              <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                상태
+              </th>
+              <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                작업
+              </th>
+            </tr>
+          </thead>
+
+          <!-- Table body -->
+          <tbody>
+            {% if records %}
+              {% for record in records %}
+                <tr style="border-bottom: 1px solid var(--color-border); transition: background-color var(--transition-fast); cursor: pointer;"
+                onclick="window.location.href='{{ url_for('record.my_record_detail', record_id=record._id) }}';"
+                onmouseenter="this.style.backgroundColor='var(--color-surface-warm)';"
+                onmouseleave="this.style.backgroundColor='transparent';">
+                  <td style="padding: var(--space-4); color: var(--color-text);">
+                    {{ record.distance }} km
+                  </td>
+                  <td style="padding: var(--space-4); color: var(--color-text-secondary);">
+                    {{ record.date }}
+                  </td>
+                  <td style="padding: var(--space-4); text-align: center;">
+                    {% if record.status == 'pending' %}
+                      <span class="badge badge-primary">
+                        <i data-feather="clock" style="width: 12px; height: 12px;"></i>
+                        대기 중
+                      </span>
+                    {% elif record.status == 'approved' %}
+                      <span class="badge" style="background-color: #F0FFF4; color: var(--color-success); border: 1px solid var(--color-success); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); display: inline-flex; align-items: center; gap: var(--space-1);">
+                        <i data-feather="check-circle" style="width: 12px; height: 12px;"></i>
+                        승인됨
+                      </span>
+                    {% elif record.status == 'rejected' %}
+                      <span class="badge" style="background-color: #FFF0F0; color: var(--color-error); border: 1px solid var(--color-error); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); display: inline-flex; align-items: center; gap: var(--space-1);">
+                        <i data-feather="x-circle" style="width: 12px; height: 12px;"></i>
+                        거절됨
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td style="padding: var(--space-4); text-align: center;" onclick="event.stopPropagation();">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-2);">
+                      <a href="{{ url_for('record.my_record_detail', record_id=record._id) }}" class="btn btn-ghost btn-sm">
+                        <i data-feather="eye"></i>
+                        보기
+                      </a>
+                      {% if record.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('record.delete_my_record', record_id=record._id) }}" style="display: inline;" onsubmit="return confirm('이 기록을 삭제하시겠습니까?');">
+                          <button type="submit" class="btn btn-sm" style="background-color: #FFE8E8; color: #E85D75; border: 1px solid #E85D75; border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); cursor: pointer; transition: all var(--transition-fast);" onmouseover="this.style.backgroundColor='#FFD9D9';" onmouseout="this.style.backgroundColor='#FFE8E8';">
+                            <i data-feather="trash-2"></i>
+                            삭제
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="4" style="padding: var(--space-8); text-align: center; color: var(--color-text-muted);">
+                  등록한 기록이 없습니다
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+
+        </table>
+      </div>
+
+      <!-- Empty state (shown when no records) -->
+      <div style="display: none; text-align: center; padding: var(--space-16) var(--space-8);">
+        <svg style="width: 64px; height: 64px; margin: 0 auto var(--space-4); color: var(--color-text-muted); opacity: 0.5; stroke: currentColor; fill: none;" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <h3 style="margin-bottom: var(--space-2);">등록한 기록이 없습니다</h3>
+        <p style="color: var(--color-text-secondary);">
+          지금 바로 기록을 등록해보세요!
+        </p>
+        <a href="{{ url_for('record.running_record') }}" class="btn btn-primary btn-lg" style="margin-top: var(--space-6); display: inline-flex; align-items: center; gap: var(--space-2);">
+          <i data-feather="plus"></i>
+          기록 등록하기
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  feather.replace();
+
+  // Filter functionality
+  document.getElementById('status-filter').addEventListener('change', function(e) {
+    console.log('Filter changed to:', e.target.value);
+    // Filter logic would go here
+  });
+</script>
+
+{% endblock %}

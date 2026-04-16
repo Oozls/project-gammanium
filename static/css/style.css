@@ -1,0 +1,25 @@
+/* =============================================================
+   style.css — Main stylesheet
+   Imports all CSS modules
+   ============================================================= */
+
+/* Design tokens */
+@import url('./variables.css');
+
+/* Base styles */
+@import url('./base.css');
+
+/* Components */
+@import url('./components.css');
+
+/* Layout */
+@import url('./layout.css');
+
+/* Utilities */
+@import url('./utilities.css');
+
+/* Animations */
+@import url('./animations.css');
+
+/* Responsive styles */
+@import url('./responsive.css');

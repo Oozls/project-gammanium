@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}런닝 기록 등록 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     RUNNING RECORD REGISTRATION PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container container-md">
+
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: var(--space-12);">
+      <h1 style="margin-bottom: var(--space-4);">런닝 기록 등록</h1>
+      <p class="text-md" style="color: var(--color-text-secondary);">
+        오늘의 런닝을 기록하고 리더보드에서 경쟁하세요
+      </p>
+    </div>
+
+    <!-- Main form card -->
+    <div class="card" style="max-width: 640px; margin-left: auto; margin-right: auto;">
+
+      <!-- Form -->
+      <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: var(--space-6);">
+
+        <!-- Section 1: Basic Info -->
+        <div>
+          <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">기본 정보</h3>
+
+          <!-- Distance -->
+          <div class="form-group">
+            <label class="form-label required">런닝 거리</label>
+            <div style="display: flex; align-items: flex-end; gap: var(--space-3);">
+              <input
+                type="number"
+                name="distance"
+                class="form-input"
+                placeholder="10.5"
+                step="0.1"
+                min="0"
+                required
+                style="flex: 1;"
+              />
+              <span style="padding: var(--space-3) var(--space-4); color: var(--color-text-secondary); font-weight: var(--font-weight-medium);">km</span>
+            </div>
+          </div>
+
+
+          <!-- Date -->
+          <div class="form-group">
+            <label class="form-label required">런닝 날짜</label>
+            <input
+              type="date"
+              name="date"
+              class="form-input"
+              required
+            />
+          </div>
+
+        </div>
+
+        <!-- Divider -->
+        <div style="height: 1px; background-color: var(--color-border); margin: var(--space-4) 0;"></div>
+
+        <!-- Section 2: Evidence -->
+        <div>
+          <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">증거 자료</h3>
+
+          <!-- Evidence image file upload -->
+          <div class="form-group">
+            <label class="form-label">증거 이미지</label>
+
+            <label
+              id="upload-label"
+              for="evidence_image"
+              style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: var(--space-3);
+                padding: var(--space-8) var(--space-6);
+                border: 2px dashed var(--color-border);
+                border-radius: var(--radius-lg);
+                cursor: pointer;
+                transition: border-color 0.2s, background-color 0.2s;
+              "
+              onmouseover="this.style.borderColor='var(--color-primary)'; this.style.backgroundColor='var(--color-surface-warm)';"
+              onmouseout="this.style.borderColor='var(--color-border)'; this.style.backgroundColor='';"
+            >
+              <i data-feather="upload" style="width: 32px; height: 32px; color: var(--color-text-secondary);"></i>
+              <span id="upload-text" style="color: var(--color-text-secondary); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);">
+                클릭하여 이미지 선택
+              </span>
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                PNG, JPG, JPEG 형식 지원
+              </span>
+            </label>
+
+            <input
+              type="file"
+              id="evidence_image"
+              name="evidence_image"
+              accept="image/png, image/jpeg, image/jpg"
+              style="display: none;"
+              onchange="handleFileSelect(this)"
+            />
+
+            <p class="form-hint">러닝 앱 스크린샷이나 GPS 기록 이미지 (선택 사항)</p>
+          </div>
+
+        </div>
+
+        <!-- Divider -->
+        <div style="height: 1px; background-color: var(--color-border); margin: var(--space-4) 0;"></div>
+
+        <!-- Section 3: Comment -->
+        <div>
+          <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">추가 정보</h3>
+
+          <!-- Comment -->
+          <div class="form-group">
+            <label class="form-label">코멘트</label>
+            <textarea
+              name="comment"
+              class="form-textarea"
+              placeholder="런닝 중 있었던 일, 느낀 점, 특이사항 등을 자유롭게 남겨주세요"
+              style="min-height: 120px;"
+            ></textarea>
+            <p class="form-hint">선택 사항 (최대 500자)</p>
+          </div>
+
+
+        </div>
+
+        <!-- Form actions -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-top: var(--space-6);">
+          <button type="reset" class="btn btn-ghost-neutral btn-lg">
+            <i data-feather="x"></i>
+            초기화
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i data-feather="check"></i>
+            기록 등록
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  function handleFileSelect(input) {
+    const textEl = document.getElementById('upload-text');
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      textEl.textContent = file.name;
+      textEl.style.color = 'var(--color-text)';
+      textEl.style.fontWeight = 'var(--font-weight-semibold)';
+    } else {
+      textEl.textContent = '클릭하여 이미지 선택';
+      textEl.style.color = 'var(--color-text-secondary)';
+      textEl.style.fontWeight = 'var(--font-weight-medium)';
+    }
+  }
+
+  feather.replace();
+</script>
+
+{% endblock %}

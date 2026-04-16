@@ -1,0 +1,314 @@
+/* =============================================================
+   layout.css — Navbar, Footer, Mobile Navigation
+   ============================================================= */
+
+/* ---------------------------------------------------------------
+   NAVBAR
+--------------------------------------------------------------- */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--navbar-height);
+  background-color: rgba(255, 250, 245, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 1px 4px rgba(180, 80, 20, 0.06);
+  display: flex;
+  align-items: center;
+}
+
+.navbar > .container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.navbar-brand span.brand-primary {
+  color: var(--color-text);
+}
+
+.navbar-brand span.brand-accent {
+  color: var(--color-primary);
+}
+
+.navbar-brand:hover {
+  color: var(--color-primary);
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  justify-content: center;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast),
+              background-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.nav-link svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.nav-link:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface-warm);
+}
+
+.nav-link.active {
+  color: var(--color-primary);
+  background-color: var(--color-surface-warm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ---------------------------------------------------------------
+   FOOTER
+--------------------------------------------------------------- */
+.footer {
+  background-color: var(--color-surface-warm);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-8);
+}
+
+.footer .container {
+  padding-left: var(--space-8);
+  padding-right: var(--space-8);
+}
+
+.footer-grid {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-10);
+  margin-bottom: var(--space-10);
+}
+
+.footer-brand {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-3);
+  display: block;
+}
+
+.footer-brand span {
+  color: var(--color-primary);
+}
+
+.footer-brand-col {
+  width: 100%;
+  text-align: center;
+}
+
+.footer-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+  max-width: 100%;
+}
+
+.footer-col-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.footer-links a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-links a svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.footer-links a:hover {
+  color: var(--color-primary);
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-copy {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------
+   MOBILE NAV
+--------------------------------------------------------------- */
+
+/* Hamburger button — shown on mobile, hidden on desktop */
+.navbar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  position: relative;
+  margin-left: auto;
+  padding: var(--space-2);
+}
+
+.navbar-toggle:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface-warm);
+}
+
+.navbar-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Feather icon inside toggle button */
+.navbar-toggle i[data-feather] {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.5;
+}
+
+/* Hide toggle on desktop screens (769px+) */
+@media (min-width: 769px) {
+  .navbar-toggle {
+    display: none;
+  }
+}
+
+/* Mobile drawer — sits directly below the navbar */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background-color: rgba(255, 250, 245, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 8px 24px rgba(180, 80, 20, 0.10);
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  overflow-y: auto;
+  max-height: calc(100vh - var(--navbar-height));
+}
+
+.mobile-nav.is-open {
+  display: block;
+}
+
+/* Nav links inside the drawer */
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.mobile-nav-links .nav-link {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-base);
+  border-radius: var(--radius-md);
+}
+
+/* Divider between links and auth actions */
+.mobile-nav-divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-3) 0;
+}
+
+/* Auth actions in drawer */
+.mobile-nav-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* User identity row inside drawer */
+.mobile-nav-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.mobile-nav-actions .btn {
+  width: 100%;
+  justify-content: center;
+}

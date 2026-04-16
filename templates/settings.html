@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}설정 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     SETTINGS PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container" style="max-width: 600px;">
+
+    <!-- Header -->
+    <div style="margin-bottom: var(--space-12);">
+      <h1 style="margin-bottom: var(--space-2);">설정</h1>
+      <p class="text-md" style="color: var(--color-text-secondary);">
+        계정 설정을 관리합니다
+      </p>
+    </div>
+
+    <!-- Profile image section -->
+    <div class="card">
+      <h3 style="margin-bottom: var(--space-6); font-size: var(--font-size-lg);">프로필 사진</h3>
+
+      <!-- Current profile image preview -->
+      <div style="margin-bottom: var(--space-8); text-align: center;">
+        <div style="margin-bottom: var(--space-4); display: flex; flex-direction: column; align-items: center;">
+          {% if current_user.profile_image %}
+            <img id="profile-preview"
+                 src="{{ url_for('settings.get_profile_image', user_id=current_user.id) }}"
+                 alt="{{ current_user.username }}"
+                 style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-border);"
+                 onerror="handleSettingsProfileImageError()">
+          {% else %}
+            <div id="profile-preview" style="
+              width: 120px;
+              height: 120px;
+              border-radius: 50%;
+              background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-size: var(--font-size-3xl);
+              font-weight: var(--font-weight-bold);
+              margin: 0 auto;
+              border: 2px solid var(--color-border);
+            ">
+              {{ current_user.username[0] | upper }}
+            </div>
+          {% endif %}
+        </div>
+        <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+          현재 프로필 사진
+        </p>
+      </div>
+
+      <!-- Upload form -->
+      <form method="POST" action="{{ url_for('settings.upload_profile_image') }}" enctype="multipart/form-data">
+        <div style="margin-bottom: var(--space-4);">
+          <label style="display: block; margin-bottom: var(--space-2); font-weight: var(--font-weight-semibold); color: var(--color-text);">
+            새 사진 선택
+          </label>
+          <input type="file"
+                 name="profile_image"
+                 accept="image/png,image/jpeg,image/jpg"
+                 required
+                 style="display: block; width: 100%; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background-color: var(--color-surface); color: var(--color-text); cursor: pointer;">
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-2);">
+            PNG, JPG, JPEG 형식 지원 (최대 10MB)
+          </p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+          <i data-feather="upload"></i>
+          사진 업로드
+        </button>
+      </form>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  feather.replace();
+
+  function handleSettingsProfileImageError() {
+    const preview = document.getElementById('profile-preview');
+    const username = '{{ current_user.username }}';
+    const firstLetter = username.charAt(0).toUpperCase();
+
+    preview.outerHTML = `
+      <div id="profile-preview" style="
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: var(--font-size-3xl);
+        font-weight: var(--font-weight-bold);
+        margin: 0 auto;
+        border: 2px solid var(--color-border);
+      ">
+        ${firstLetter}
+      </div>
+    `;
+  }
+</script>
+
+{% endblock %}

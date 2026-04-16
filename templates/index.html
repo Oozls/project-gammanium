@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}사제동행 런닝 프로그램 — 따뜻한 시작{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     HERO SECTION
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-24); background: linear-gradient(160deg, var(--color-bg) 0%, #FFF0E0 55%, var(--color-bg) 100%);">
+  <div class="container">
+    <div class="flex flex-col items-center text-center" style="max-width: 720px; margin-left: auto; margin-right: auto;">
+
+      <!-- Badge label -->
+      <div class="animate-fade-in delay-1">
+        <span class="badge badge-primary" style="margin-bottom: var(--space-6);">
+          <i data-feather="activity"></i>
+          함께 달리고, 함께 성장하세요
+        </span>
+      </div>
+
+      <!-- Main heading -->
+      <h1 class="animate-fade-in delay-2" style="margin-bottom: var(--space-6); letter-spacing: -0.04em;">
+        사제동행<br>
+        <span style="color: var(--color-primary);">런닝 프로그램</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="animate-fade-in delay-3 text-md" style="max-width: 480px; margin-bottom: var(--space-10); color: var(--color-text-secondary);">
+        당신의 런닝 기록을 기록하고, 리더보드에서 경쟁하며, 우수한 성과에 대한 보상을 받으세요.
+        투명하고 공정한 시스템으로 함께 달리는 즐거움을 경험하세요.
+      </p>
+
+      <!-- CTA buttons -->
+      <div class="animate-fade-in delay-4 flex items-center gap-4 flex-wrap justify-center">
+        <a href="/submit" class="btn btn-primary btn-xl">
+          <i data-feather="pen-tool"></i>
+          기록 등록하기
+        </a>
+        <a href="/leaderboard" class="btn btn-ghost btn-xl">
+          <i data-feather="bar-chart-2"></i>
+          리더보드 보기
+        </a>
+      </div>
+
+      <!-- Trust note -->
+      <div class="animate-fade-in delay-5 text-xs text-muted" style="margin-top: var(--space-6); display: flex; align-items: center; justify-content: center; gap: var(--space-2); flex-wrap: wrap;">
+        <span style="display: flex; align-items: center; gap: var(--space-1);">
+          <i data-feather="shield" style="width: 14px; height: 14px;"></i>
+          투명한 승인 시스템
+        </span>
+        <span>&nbsp;&middot;&nbsp;</span>
+        <span style="display: flex; align-items: center; gap: var(--space-1);">
+          <i data-feather="users" style="width: 14px; height: 14px;"></i>
+          공정한 경쟁
+        </span>
+        <span>&nbsp;&middot;&nbsp;</span>
+        <span style="display: flex; align-items: center; gap: var(--space-1);">
+          <i data-feather="award" style="width: 14px; height: 14px;"></i>
+          우수 성과 보상
+        </span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================
+     FEATURE CARDS SECTION
+=========================================================== -->
+<section class="section" id="features">
+  <div class="container">
+
+    <!-- Section header -->
+    <div class="section-header">
+      <div class="accent-line mx-auto"></div>
+      <h2>프로그램의 핵심</h2>
+      <p>당신의 노력을 기록하고, 검증하고, 보상합니다. 함께 달리는 즐거움을 경험하세요.</p>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="grid grid-cols-3 gap-6" style="grid-auto-rows: 1fr;">
+
+      <!-- Card 1 -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon">
+            <i data-feather="activity"></i>
+          </div>
+          <div>
+            <h3 class="card-title">런닝 기록 등록</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>
+            당신의 모든 런닝 활동을 쉽고 빠르게 기록하세요.
+            거리, 시간, 페이스 등 상세한 정보를 입력하고 목표 달성을 추적하세요.
+          </p>
+        </div>
+        <div class="card-footer">
+          <span class="badge badge-primary">
+            <i data-feather="edit-2"></i>
+            간편 기록
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon card-icon-orange">
+            <i data-feather="check-circle"></i>
+          </div>
+          <div>
+            <h3 class="card-title">투명한 승인</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>
+            관리자가 제출된 기록을 공정하게 검토하고 승인합니다.
+            명확한 기준과 빠른 승인 프로세스로 결과를 신속하게 확인할 수 있습니다.
+          </p>
+        </div>
+        <div class="card-footer">
+          <span class="badge badge-orange">
+            <i data-feather="thumbs-up"></i>
+            신뢰성
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon card-icon-accent">
+            <i data-feather="award"></i>
+          </div>
+          <div>
+            <h3 class="card-title">리더보드 & 보상</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>
+            실시간 리더보드에서 당신의 성과를 확인하세요.
+            우수한 성적을 거두면 상위권 보상을 받을 수 있습니다.
+          </p>
+        </div>
+        <div class="card-footer">
+          <span class="badge badge-accent">
+            <i data-feather="star"></i>
+            성과 보상
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#FFFAF5">
+
+  <title>{% block title %}사제동행 런닝 프로그램{% endblock %}</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Site stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- Feather Icons (CDN) -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+  ============================================================= -->
+  <header class="navbar">
+    <div class="container">
+      <nav class="navbar-inner">
+
+        <!-- Brand -->
+        <a href="/" class="navbar-brand">
+          <i data-feather="activity"></i>
+          <span class="brand-primary">청원고</span> <span class="brand-accent">사제동행 런닝</span>
+        </a>
+
+        <!-- Hamburger (mobile only) -->
+        <button class="navbar-toggle" id="navbar-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-nav">
+          <i data-feather="menu"></i>
+        </button>
+
+        <!-- Nav links -->
+        <ul class="navbar-nav">
+          <li>
+            <a href="/" class="nav-link">
+              <i data-feather="home"></i>
+              <span>홈</span>
+            </a>
+          </li>
+          <li>
+            <a href="/submit" class="nav-link">
+              <i data-feather="activity"></i>
+              <span>기록 등록</span>
+            </a>
+          </li>
+          <li>
+            <a href="/leaderboard" class="nav-link">
+              <i data-feather="award"></i>
+              <span>리더보드</span>
+            </a>
+          </li>
+          <li>
+            <a href="/records" class="nav-link">
+              <i data-feather="list"></i>
+              <span>내 기록</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Navbar actions -->
+        <div class="navbar-actions">
+          {% if current_user.is_authenticated %}
+            <!-- Logged in user -->
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <!-- Profile image and username -->
+              <a href="{{ url_for('settings.settings_page') }}" style="display: flex; align-items: center; gap: var(--space-2); text-decoration: none;">
+                {% if current_user.profile_image %}
+                  <img src="{{ url_for('settings.get_profile_image', user_id=current_user.id) }}"
+                       alt="{{ current_user.username }}"
+                       style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border);"
+                       onerror="handleProfileImageError(this)">
+                {% else %}
+                  <div id="profile-avatar-navbar" style="
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: var(--font-size-sm);
+                    font-weight: var(--font-weight-bold);
+                    border: 1px solid var(--color-border);
+                  ">
+                    {{ current_user.username[0] | upper }}
+                  </div>
+                {% endif %}
+                <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+                  {{ current_user.username }}
+                </span>
+              </a>
+
+              <a href="{{ url_for('user.logout') }}" class="btn btn-ghost btn-sm">
+                <i data-feather="log-out"></i>
+                로그아웃
+              </a>
+              {% if current_user.is_admin %}
+                <a href="/admin/records" class="btn btn-primary btn-sm">
+                  <i data-feather="settings"></i>
+                  관리자
+                </a>
+              {% endif %}
+            </div>
+          {% else %}
+            <!-- Not logged in -->
+            <a href="{{ url_for('user.login') }}" class="btn btn-ghost btn-sm">
+              <i data-feather="log-in"></i>
+              로그인
+            </a>
+            <a href="{{ url_for('user.signup') }}" class="btn btn-primary btn-sm">
+              <i data-feather="user-plus"></i>
+              시작하기
+            </a>
+          {% endif %}
+        </div>
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MOBILE NAV DRAWER
+  ============================================================= -->
+  <nav id="mobile-nav" class="mobile-nav" aria-label="모바일 내비게이션">
+
+    <!-- Nav links (mirrors .navbar-nav) -->
+    <ul class="mobile-nav-links">
+      <li>
+        <a href="/" class="nav-link">
+          <i data-feather="home"></i>
+          <span>홈</span>
+        </a>
+      </li>
+      <li>
+        <a href="/submit" class="nav-link">
+          <i data-feather="activity"></i>
+          <span>기록 등록</span>
+        </a>
+      </li>
+      <li>
+        <a href="/leaderboard" class="nav-link">
+          <i data-feather="award"></i>
+          <span>리더보드</span>
+        </a>
+      </li>
+      <li>
+        <a href="/records" class="nav-link">
+          <i data-feather="list"></i>
+          <span>내 기록</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="mobile-nav-divider"></div>
+
+    <!-- Auth actions (mirrors .navbar-actions) -->
+    <div class="mobile-nav-actions">
+      {% if current_user.is_authenticated %}
+        <!-- Identity row -->
+        <div class="mobile-nav-user">
+          {% if current_user.profile_image %}
+            <img src="{{ url_for('settings.get_profile_image', user_id=current_user.id) }}"
+                 alt="{{ current_user.username }}"
+                 style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border);"
+                 onerror="handleProfileImageError(this)">
+          {% else %}
+            <div style="
+              width: 36px; height: 36px; border-radius: 50%;
+              background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+              display: flex; align-items: center; justify-content: center;
+              color: white; font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);
+              border: 1px solid var(--color-border); flex-shrink: 0;
+            ">{{ current_user.username[0] | upper }}</div>
+          {% endif %}
+          <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary); font-weight: var(--font-weight-medium);">
+            {{ current_user.username }}
+          </span>
+        </div>
+        <a href="{{ url_for('user.logout') }}" class="btn btn-ghost btn-sm">
+          <i data-feather="log-out"></i>
+          로그아웃
+        </a>
+        {% if current_user.is_admin %}
+          <a href="/admin/records" class="btn btn-primary btn-sm">
+            <i data-feather="settings"></i>
+            관리자
+          </a>
+        {% endif %}
+      {% else %}
+        <a href="{{ url_for('user.login') }}" class="btn btn-ghost btn-sm">
+          <i data-feather="log-in"></i>
+          로그인
+        </a>
+        <a href="{{ url_for('user.signup') }}" class="btn btn-primary btn-sm">
+          <i data-feather="user-plus"></i>
+          시작하기
+        </a>
+      {% endif %}
+    </div>
+
+  </nav>
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================= -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================= -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+
+        <!-- Brand column -->
+        <div class="footer-brand-col">
+          <span class="footer-brand">사제<span>동행</span></span>
+          <p class="footer-desc">
+            따뜻하고 스마트한 방식으로 더 나은 경험을 만들어갑니다.
+            사제동행 런닝 프로그램과 함께 시작해보세요.
+          </p>
+        </div>
+
+
+      </div>
+
+      <!-- Footer bottom bar -->
+      <div class="footer-bottom">
+        <p class="footer-copy">
+          &copy; 2026 사제동행 런닝 프로그램.
+        </p>
+        <p class="footer-copy">
+          All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Flash messages (hidden, processed by JavaScript) -->
+  {{ flash_messages_html | safe }}
+
+  <!-- ============================================================
+       TOAST CONTAINER
+  ============================================================= -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ============================================================
+       SCRIPTS
+  ============================================================= -->
+  <script>
+    feather.replace();
+
+    // 프로필 이미지 로드 실패 처리
+    function handleProfileImageError(imgElement) {
+      const parent = imgElement.parentElement;
+      const username = imgElement.alt;
+      const firstLetter = username.charAt(0).toUpperCase();
+
+      parent.innerHTML = `
+        <div style="
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-bold);
+          border: 1px solid var(--color-border);
+        ">
+          ${firstLetter}
+        </div>
+      `;
+    }
+
+    // 토스트 메시지 함수
+    function showToast(message, type = 'info', duration = 4000) {
+      const container = document.getElementById('toast-container');
+
+      // 배경색과 아이콘 결정
+      let bgColor, borderColor, textColor, icon;
+      if (type === 'success') {
+        bgColor = '#F0FFF4';
+        borderColor = 'var(--color-success)';
+        textColor = 'var(--color-success)';
+        icon = 'check-circle';
+      } else if (type === 'error') {
+        bgColor = '#FFF0F0';
+        borderColor = 'var(--color-error)';
+        textColor = 'var(--color-error)';
+        icon = 'alert-circle';
+      } else {
+        bgColor = '#F0F9FF';
+        borderColor = 'var(--color-primary)';
+        textColor = 'var(--color-primary)';
+        icon = 'info';
+      }
+
+      // 토스트 요소 생성
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-4) var(--space-5);
+        background-color: ${bgColor};
+        border: 1px solid ${borderColor};
+        border-radius: var(--radius-lg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-size: var(--font-size-sm);
+        color: ${textColor};
+        font-weight: var(--font-weight-medium);
+        pointer-events: auto;
+        animation: slideInUp 0.3s ease-out;
+        min-width: 280px;
+      `;
+
+      // 아이콘 추가
+      const iconEl = document.createElement('i');
+      iconEl.setAttribute('data-feather', icon);
+      iconEl.style.cssText = 'width: 18px; height: 18px; flex-shrink: 0;';
+
+      // 메시지 추가
+      const messageEl = document.createElement('span');
+      messageEl.textContent = message;
+      messageEl.style.flex = '1';
+
+      toast.appendChild(iconEl);
+      toast.appendChild(messageEl);
+
+      // 컨테이너에 추가
+      container.appendChild(toast);
+
+      // 아이콘 업데이트
+      feather.replace();
+
+      // 자동 제거
+      setTimeout(() => {
+        toast.style.animation = 'slideOutDown 0.3s ease-in forwards';
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, duration);
+    }
+
+    // 페이지 로드 시 플래시 메시지 표시
+    document.addEventListener('DOMContentLoaded', function() {
+      const messages = document.querySelectorAll('[data-flash-message]');
+      messages.forEach(msg => {
+        const type = msg.getAttribute('data-flash-type') || 'info';
+        const text = msg.getAttribute('data-flash-message');
+        if (text) {
+          showToast(text, type);
+        }
+      });
+    });
+
+    // Mobile nav toggle
+    (function () {
+      const toggleBtn = document.getElementById('navbar-toggle');
+      const mobileNav = document.getElementById('mobile-nav');
+
+      if (!toggleBtn || !mobileNav) return;
+
+      function openNav() {
+        mobileNav.classList.add('is-open');
+        toggleBtn.classList.add('is-open');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        toggleBtn.setAttribute('aria-label', '메뉴 닫기');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeNav() {
+        mobileNav.classList.remove('is-open');
+        toggleBtn.classList.remove('is-open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.setAttribute('aria-label', '메뉴 열기');
+        document.body.style.overflow = '';
+      }
+
+      toggleBtn.addEventListener('click', function () {
+        if (mobileNav.classList.contains('is-open')) {
+          closeNav();
+        } else {
+          openNav();
+        }
+      });
+
+      // Close when a nav link inside the drawer is tapped
+      mobileNav.querySelectorAll('.nav-link, .btn').forEach(function (el) {
+        el.addEventListener('click', closeNav);
+      });
+
+      // Close if window is resized above 768px (e.g. tablet rotate)
+      window.addEventListener('resize', function () {
+        if (window.innerWidth > 768) {
+          closeNav();
+        }
+      });
+    }());
+  </script>
+
+  <!-- Toast animations -->
+  <style>
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideOutDown {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+    }
+  </style>
+
+  <!-- Prevent double submission on forms -->
+  <script>
+    (function() {
+      // Prevent form double submission by disabling submit buttons
+      document.addEventListener('submit', function(e) {
+        const form = e.target;
+        const submitButtons = form.querySelectorAll('button[type="submit"]');
+
+        submitButtons.forEach(btn => {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          btn.style.cursor = 'not-allowed';
+          btn.textContent = '처리 중...';
+        });
+
+        // Don't re-enable - backend will handle duplicate detection
+        // Page will reload on success, or user can refresh on error
+      });
+    })();
+  </script>
+
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

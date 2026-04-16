@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}리더보드 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     LEADERBOARD PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container container-lg">
+
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: var(--space-12);">
+      <div class="badge badge-accent" style="margin-bottom: var(--space-4); display: inline-flex;">
+        <i data-feather="award"></i>
+        실시간 경쟁
+      </div>
+      <h1 style="margin-bottom: var(--space-4);">리더보드</h1>
+      <p class="text-md" style="color: var(--color-text-secondary);">
+        누가 가장 많이, 가장 빠르게 달렸을까요?
+      </p>
+    </div>
+
+    <!-- Filter and sort tabs -->
+    <div style="display: flex; justify-content: center; gap: var(--space-4); margin-bottom: var(--space-8); flex-wrap: wrap;">
+
+      <a href="{{ url_for('record.leaderboard', filter='all') }}" class="btn {% if current_filter == 'all' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none;">
+        <i data-feather="zap"></i>
+        전체
+      </a>
+
+      <a href="{{ url_for('record.leaderboard', filter='week') }}" class="btn {% if current_filter == 'week' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none;">
+        <i data-feather="trending-up"></i>
+        이번 주
+      </a>
+
+      <a href="{{ url_for('record.leaderboard', filter='month') }}" class="btn {% if current_filter == 'month' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none;">
+        <i data-feather="calendar"></i>
+        이번 달
+      </a>
+
+    </div>
+
+    <!-- Stats cards -->
+    <div class="grid grid-cols-2 gap-6" style="margin-bottom: var(--space-12);">
+
+      <!-- Total distance card -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon card-icon-orange">
+            <i data-feather="target"></i>
+          </div>
+          <div>
+            <h3 class="card-title">총 런닝 거리</h3>
+          </div>
+        </div>
+        <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-primary-light); margin-bottom: var(--space-2);">
+          {{ stats.total_distance | round(1) }} km
+        </div>
+        <p class="text-sm" style="color: var(--color-text-secondary);">
+          전체 승인된 기록
+        </p>
+      </div>
+
+      <!-- Participants card -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon card-icon-accent">
+            <i data-feather="users"></i>
+          </div>
+          <div>
+            <h3 class="card-title">활성 참여자</h3>
+          </div>
+        </div>
+        <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-accent); margin-bottom: var(--space-2);">
+          {{ leaderboard | length }}
+        </div>
+        <p class="text-sm" style="color: var(--color-text-secondary);">
+          승인된 기록이 있는 사용자
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Top 3 Podium -->
+    <div class="podium-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-bottom: var(--space-12);">
+
+      <!-- 2nd place -->
+      {% if leaderboard_all | length >= 2 %}
+      <div style="order: 2;" data-podium="2">
+        <div class="card" style="background: linear-gradient(135deg, #FFF3E8 0%, #FFF8F0 100%); border-color: #FFD9A3;">
+          <div style="text-align: center; margin-bottom: var(--space-4);">
+            <div style="
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 56px;
+              height: 56px;
+              border-radius: var(--radius-full);
+              background: linear-gradient(135deg, #F26522 0%, #E8A020 100%);
+              color: white;
+              font-size: var(--font-size-2xl);
+              font-weight: var(--font-weight-bold);
+              margin: 0 auto var(--space-3);
+            ">
+              <i data-feather="award" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h3 style="margin-bottom: var(--space-1);">{{ leaderboard_all[1].user.username if leaderboard_all[1].user else '알 수 없음' }}</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">2nd Place</p>
+          </div>
+          <div style="background-color: white; padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2);">총 거리</p>
+            <p style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+              {{ leaderboard_all[1].total_distance | round(1) }} km
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 1st place -->
+      {% if leaderboard_all | length >= 1 %}
+      <div style="order: 1;" data-podium="1">
+        <div class="card" style="background: linear-gradient(135deg, #FFF7E0 0%, #FFFAED 100%); border-color: #FFE5A3; transform: scale(1.05);">
+          <div style="text-align: center; margin-bottom: var(--space-4);">
+            <div style="
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 64px;
+              height: 64px;
+              border-radius: var(--radius-full);
+              background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+              color: white;
+              font-size: var(--font-size-3xl);
+              font-weight: var(--font-weight-bold);
+              margin: 0 auto var(--space-3);
+              box-shadow: 0 8px 20px rgba(255, 200, 0, 0.25);
+            ">
+              <i data-feather="star" style="width: 36px; height: 36px;"></i>
+            </div>
+            <h3 style="margin-bottom: var(--space-1);">{{ leaderboard_all[0].user.username if leaderboard_all[0].user else '알 수 없음' }}</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-accent); font-weight: var(--font-weight-semibold);">1st Place</p>
+          </div>
+          <div style="background-color: white; padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2);">총 거리</p>
+            <p style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+              {{ leaderboard_all[0].total_distance | round(1) }} km
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 3rd place -->
+      {% if leaderboard_all | length >= 3 %}
+      <div style="order: 3;" data-podium="3">
+        <div class="card" style="background: linear-gradient(135deg, #F5F5F5 0%, #FAFAFA 100%); border-color: #E0E0E0;">
+          <div style="text-align: center; margin-bottom: var(--space-4);">
+            <div style="
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 56px;
+              height: 56px;
+              border-radius: var(--radius-full);
+              background: linear-gradient(135deg, #CD7F32 0%, #B87333 100%);
+              color: white;
+              font-size: var(--font-size-2xl);
+              font-weight: var(--font-weight-bold);
+              margin: 0 auto var(--space-3);
+            ">
+              <i data-feather="award" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h3 style="margin-bottom: var(--space-1);">{{ leaderboard_all[2].user.username if leaderboard_all[2].user else '알 수 없음' }}</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">3rd Place</p>
+          </div>
+          <div style="background-color: white; padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2);">총 거리</p>
+            <p style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+              {{ leaderboard_all[2].total_distance | round(1) }} km
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Full ranking table -->
+    <div>
+      <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">순위</h3>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+
+          <!-- Table header -->
+          <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+              <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm); width: 60px;">
+                순위
+              </th>
+              <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                사용자
+              </th>
+              <th style="padding: var(--space-4); text-align: right; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                총 거리
+              </th>
+              <th style="padding: var(--space-4); text-align: right; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                기록 수
+              </th>
+              <th style="padding: var(--space-4); text-align: right; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                평균 거리
+              </th>
+              <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                배지
+              </th>
+            </tr>
+          </thead>
+
+          <!-- Table body -->
+          <tbody>
+
+            {% if leaderboard %}
+              {% for entry in leaderboard %}
+              <tr style="border-bottom: 1px solid var(--color-border); transition: background-color var(--transition-fast);"
+              onmouseenter="this.style.backgroundColor='var(--color-surface-warm)';"
+              onmouseleave="this.style.backgroundColor='transparent';">
+                <td style="padding: var(--space-4); text-align: center; width: 80px;">
+                  {% if entry.rank == 1 %}
+                    <span style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: var(--radius-full);
+                      background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+                      color: white;
+                      font-weight: var(--font-weight-bold);
+                      font-size: var(--font-size-md);
+                    ">{{ entry.rank }}</span>
+                  {% elif entry.rank == 2 %}
+                    <span style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: var(--radius-full);
+                      background: linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%);
+                      color: white;
+                      font-weight: var(--font-weight-bold);
+                      font-size: var(--font-size-md);
+                    ">{{ entry.rank }}</span>
+                  {% elif entry.rank == 3 %}
+                    <span style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: var(--radius-full);
+                      background: linear-gradient(135deg, #CD7F32 0%, #B87333 100%);
+                      color: white;
+                      font-weight: var(--font-weight-bold);
+                      font-size: var(--font-size-md);
+                    ">{{ entry.rank }}</span>
+                  {% else %}
+                    <span style="font-weight: var(--font-weight-medium); color: var(--color-text);">{{ entry.rank }}</span>
+                  {% endif %}
+                </td>
+
+                <td style="padding: var(--space-4);">
+                  <div style="display: flex; align-items: center; gap: var(--space-3);">
+                    {% if entry.user and entry.user.profile_image %}
+                      <img src="{{ url_for('settings.get_profile_image', user_id=entry.user_id) }}"
+                           alt="{{ entry.user.username }}"
+                           style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border); flex-shrink: 0;"
+                           onerror="handleLeaderboardImageError(this, '{{ entry.user.username }}')">
+                    {% else %}
+                      <div class="leaderboard-avatar" data-username="{{ entry.user.username if entry.user else '?' }}" style="
+                        width: 40px;
+                        height: 40px;
+                        border-radius: var(--radius-full);
+                        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: var(--font-weight-bold);
+                        flex-shrink: 0;
+                      ">
+                        {{ entry.user.username[0] | upper if entry.user else '?' }}
+                      </div>
+                    {% endif %}
+                    <div>
+                      <p style="font-weight: var(--font-weight-medium); color: var(--color-text);">{{ entry.user.username if entry.user else '알 수 없음' }}</p>
+                      <p style="font-size: var(--font-size-xs); color: var(--color-text-muted);">{{ entry.user.email if entry.user else '' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td style="padding: var(--space-4); text-align: right;">
+                  <span style="font-weight: var(--font-weight-semibold); color: var(--color-primary); font-size: var(--font-size-md);">
+                    {{ entry.total_distance | round(1) }} km
+                  </span>
+                </td>
+
+                <td style="padding: var(--space-4); text-align: right;">
+                  <span style="color: var(--color-text); font-weight: var(--font-weight-medium);">
+                    {{ entry.count }}회
+                  </span>
+                </td>
+
+                <td style="padding: var(--space-4); text-align: right;">
+                  <span style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                    {{ entry.average_distance | round(2) }} km
+                  </span>
+                </td>
+
+                <td style="padding: var(--space-4); text-align: center;">
+                  {% if entry.rank <= 3 %}
+                    <span class="badge badge-accent" style="justify-content: center;">
+                      <i data-feather="star" style="width: 12px; height: 12px;"></i>
+                      상위 3
+                    </span>
+                  {% elif entry.rank <= 10 %}
+                    <span class="badge badge-primary" style="justify-content: center;">
+                      <i data-feather="trending-up" style="width: 12px; height: 12px;"></i>
+                      상위 10
+                    </span>
+                  {% else %}
+                    <span class="badge badge-neutral" style="justify-content: center;">
+                      <i data-feather="zap" style="width: 12px; height: 12px;"></i>
+                      활약 중
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" style="padding: var(--space-8); text-align: center; color: var(--color-text-muted);">
+                  아직 승인된 기록이 없습니다
+                </td>
+              </tr>
+            {% endif %}
+
+          </tbody>
+
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if total_pages > 1 %}
+      <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-top: var(--space-8);">
+        <!-- Previous button -->
+        {% if current_page > 1 %}
+          <a href="{{ url_for('record.leaderboard', page=current_page-1, filter=current_filter) }}" class="btn btn-ghost btn-sm">
+            <i data-feather="chevron-left"></i>
+          </a>
+        {% else %}
+          <button class="btn btn-ghost btn-sm" disabled style="opacity: 0.5; cursor: not-allowed;">
+            <i data-feather="chevron-left"></i>
+          </button>
+        {% endif %}
+
+        <!-- Page numbers -->
+        {% for page_num in page_numbers %}
+          {% if page_num == '...' %}
+            <span style="color: var(--color-text-muted); padding: 0 var(--space-2);">...</span>
+          {% elif page_num == current_page %}
+            <button class="btn btn-primary btn-sm" style="width: 36px; height: 36px; padding: 0; justify-content: center;">{{ page_num }}</button>
+          {% else %}
+            <a href="{{ url_for('record.leaderboard', page=page_num, filter=current_filter) }}" class="btn btn-ghost btn-sm" style="width: 36px; height: 36px; padding: 0; justify-content: center;">{{ page_num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Next button -->
+        {% if current_page < total_pages %}
+          <a href="{{ url_for('record.leaderboard', page=current_page+1, filter=current_filter) }}" class="btn btn-ghost btn-sm">
+            <i data-feather="chevron-right"></i>
+          </a>
+        {% else %}
+          <button class="btn btn-ghost btn-sm" disabled style="opacity: 0.5; cursor: not-allowed;">
+            <i data-feather="chevron-right"></i>
+          </button>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  feather.replace();
+
+  function handleLeaderboardImageError(imgElement, username) {
+    const parent = imgElement.parentElement;
+    const firstLetter = username.charAt(0).toUpperCase();
+
+    parent.innerHTML = `
+      <div style="
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-full);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: var(--font-weight-bold);
+        flex-shrink: 0;
+      ">
+        ${firstLetter}
+      </div>
+    `;
+  }
+</script>
+
+{% endblock %}

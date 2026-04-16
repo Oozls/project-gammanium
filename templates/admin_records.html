@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}기록 승인 관리 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     ADMIN RECORDS PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container">
+
+    <!-- Header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-8); margin-bottom: var(--space-12); flex-wrap: wrap;">
+      <div>
+        <h1 style="margin-bottom: var(--space-2);">기록 승인 관리</h1>
+        <p class="text-md" style="color: var(--color-text-secondary);">
+          사용자가 제출한 런닝 기록을 검토하고 승인합니다
+        </p>
+      </div>
+
+      <!-- Filter buttons -->
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+        <div class="form-select-wrapper">
+          <select id="status-filter" class="form-select" style="min-width: 160px;">
+            <option value="" {% if status_filter == '' %}selected{% endif %}>모든 상태</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>대기 중</option>
+            <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>승인됨</option>
+            <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>거절됨</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="grid grid-cols-3 gap-6" style="margin-bottom: var(--space-8);">
+
+      <!-- Pending card -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon">
+            <i data-feather="clock"></i>
+          </div>
+          <div>
+            <h3 class="card-title">대기 중</h3>
+          </div>
+        </div>
+        <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+          {{ stats.pending }}
+        </div>
+        <p class="text-sm" style="color: var(--color-text-secondary); margin-top: var(--space-2);">검토가 필요한 기록</p>
+      </div>
+
+      <!-- Approved card -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon card-icon-orange">
+            <i data-feather="check-circle"></i>
+          </div>
+          <div>
+            <h3 class="card-title">승인됨</h3>
+          </div>
+        </div>
+        <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-success);">
+          {{ stats.approved }}
+        </div>
+        <p class="text-sm" style="color: var(--color-text-secondary); margin-top: var(--space-2);">승인된 기록</p>
+      </div>
+
+      <!-- Rejected card -->
+      <div class="card card-warm">
+        <div class="card-header">
+          <div class="card-icon" style="background-color: #FFF0F0; color: var(--color-error); border-color: #FFD9D9;">
+            <i data-feather="x-circle"></i>
+          </div>
+          <div>
+            <h3 class="card-title">거절됨</h3>
+          </div>
+        </div>
+        <div style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-error);">
+          {{ stats.rejected }}
+        </div>
+        <p class="text-sm" style="color: var(--color-text-secondary); margin-top: var(--space-2);">거절된 기록</p>
+      </div>
+
+    </div>
+
+    <!-- Records list -->
+    <div>
+      <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">
+        {% if status_filter == 'pending' %}대기 중인 기록
+        {% elif status_filter == 'approved' %}승인된 기록
+        {% elif status_filter == 'rejected' %}거절된 기록
+        {% else %}전체 기록
+        {% endif %}
+      </h3>
+
+      <!-- Table wrapper -->
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+
+          <!-- Table header -->
+          <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+              <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                사용자
+              </th>
+              <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                거리
+              </th>
+              <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                런닝 날짜
+              </th>
+              <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                제출 시간
+              </th>
+              <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                상태
+              </th>
+              <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                작업
+              </th>
+            </tr>
+          </thead>
+
+          <!-- Table body -->
+          <tbody>
+            {% if records %}
+              {% for record in records %}
+                <tr style="border-bottom: 1px solid var(--color-border); transition: background-color var(--transition-fast); cursor: pointer;"
+                onclick="window.location.href='{{ url_for('admin.admin_record_detail', record_id=record._id) }}';"
+                onmouseenter="this.style.backgroundColor='var(--color-surface-warm)';"
+                onmouseleave="this.style.backgroundColor='transparent';">
+                  <td style="padding: var(--space-4);">
+                    <div style="font-weight: var(--font-weight-medium); color: var(--color-text); margin-bottom: var(--space-1);">
+                      {{ record.user_info.username if record.user_info else '알 수 없음' }}
+                    </div>
+                    <p style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                      {{ record.user_info.email if record.user_info else '' }}
+                    </p>
+                  </td>
+                  <td style="padding: var(--space-4); color: var(--color-text); font-weight: var(--font-weight-medium);">
+                    {{ record.distance }} km
+                  </td>
+                  <td style="padding: var(--space-4); color: var(--color-text-secondary);">
+                    {{ record.date }}
+                  </td>
+                  <td style="padding: var(--space-4); color: var(--color-text-secondary);">
+                    {% if record.submitted_at %}
+                      {{ record.submitted_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                  <td style="padding: var(--space-4); text-align: center;">
+                    {% if record.status == 'pending' %}
+                      <span class="badge badge-primary">
+                        <i data-feather="clock" style="width: 12px; height: 12px;"></i>
+                        대기 중
+                      </span>
+                    {% elif record.status == 'approved' %}
+                      <span class="badge" style="background-color: #F0FFF4; color: var(--color-success); border: 1px solid var(--color-success); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); display: inline-flex; align-items: center; gap: var(--space-1);">
+                        <i data-feather="check-circle" style="width: 12px; height: 12px;"></i>
+                        승인됨
+                      </span>
+                    {% elif record.status == 'rejected' %}
+                      <span class="badge" style="background-color: #FFF0F0; color: var(--color-error); border: 1px solid var(--color-error); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); display: inline-flex; align-items: center; gap: var(--space-1);">
+                        <i data-feather="x-circle" style="width: 12px; height: 12px;"></i>
+                        거절됨
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td style="padding: var(--space-4); text-align: center;" onclick="event.stopPropagation();">
+                    <a href="{{ url_for('admin.admin_record_detail', record_id=record._id) }}" class="btn btn-ghost btn-sm">
+                      <i data-feather="eye"></i>
+                      검토
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" style="padding: var(--space-8); text-align: center; color: var(--color-text-muted);">
+                  검토할 기록이 없습니다
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  feather.replace();
+
+  document.getElementById('status-filter').addEventListener('change', function(e) {
+    const status = e.target.value;
+    const url = new URL(window.location.href);
+    if (status) {
+      url.searchParams.set('status', status);
+    } else {
+      url.searchParams.delete('status');
+    }
+    window.location.href = url.toString();
+  });
+</script>
+
+{% endblock %}
