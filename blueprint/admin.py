@@ -5,10 +5,11 @@ Flask-Login을 사용한 관리자 페이지 관련 라우트
 from functools import wraps
 from io import BytesIO
 import os
+import logging
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file, session
 from flask_login import current_user
-from database import fetch_file_bytes
+from database import fetch_file_bytes, delete_folder
 from database.mongodb import (
     get_all_records,
     get_record,
@@ -17,6 +18,8 @@ from database.mongodb import (
     get_global_stats,
     get_user,
 )
+
+logger = logging.getLogger(__name__)
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -58,7 +61,8 @@ def admin_records():
         )
 
     except Exception as e:
-        flash(f'기록 조회 중 오류가 발생했습니다: {str(e)}', 'error')
+        logger.exception('관리자 기록 조회 오류')
+        flash('기록 조회 중 오류가 발생했습니다', 'error')
         return render_template(
             'admin_records.html',
             records=[],
@@ -83,7 +87,8 @@ def admin_record_detail(record_id):
         return render_template('admin_record_detail.html', record=record, user=user)
 
     except Exception as e:
-        flash(f'기록 조회 중 오류가 발생했습니다: {str(e)}', 'error')
+        logger.exception('관리자 기록 상세 조회 오류')
+        flash('기록 조회 중 오류가 발생했습니다', 'error')
         return redirect(url_for('admin.admin_records'))
 
 
@@ -108,6 +113,10 @@ def admin_review_record(record_id):
 
     if decision not in ['approve', 'reject']:
         flash('올바른 결정을 선택해주세요', 'error')
+        return redirect(url_for('admin.admin_record_detail', record_id=record_id))
+
+    if len(admin_comment) > 500:
+        flash('관리자 코멘트는 500자 이하여야 합니다', 'error')
         return redirect(url_for('admin.admin_record_detail', record_id=record_id))
 
     status = 'approved' if decision == 'approve' else 'rejected'
@@ -156,6 +165,18 @@ def admin_delete_record(record_id):
             flash('기록을 찾을 수 없습니다', 'error')
             return redirect(url_for('admin.admin_records'))
 
+        # HuggingFace에서 폴더와 파일 삭제
+        user_id = str(record.get('user_id'))
+        folder_path = f"data/img/{user_id}/{record_id}"
+
+        # 먼저 해당 기록의 폴더 전체 삭제 시도
+        try:
+            delete_folder(folder_path)
+        except Exception as folder_err:
+            print(f"관리자 삭제 중 폴더 삭제 실패: {folder_path}, {str(folder_err)}")
+            # 폴더 삭제 실패 시에도 계속 진행
+
+        # MongoDB에서 기록 삭제
         delete_record(record_id)
         flash('기록이 삭제되었습니다', 'success')
         return redirect(url_for('admin.admin_records'))

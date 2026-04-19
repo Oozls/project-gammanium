@@ -116,6 +116,53 @@ def create_folder(remote_folder_path: str, commit_message: str = None):
     )
 
 
+def delete_folder(remote_folder_path: str, commit_message: str = None):
+    """
+    폴더와 그 안의 모든 파일을 삭제합니다.
+
+    Args:
+        remote_folder_path: 삭제할 폴더 경로 (e.g., "data/img/user_id/record_id")
+        commit_message: 커밋 메시지
+    """
+    _validate_credentials()
+
+    if commit_message is None:
+        commit_message = f"Delete folder {remote_folder_path}"
+
+    try:
+        # 폴더 내의 모든 파일을 찾기
+        tree_entries = api.list_repo_tree(
+            repo_id=HF_REPO,
+            token=HF_TOKEN,
+            recursive=True,
+            repo_type="dataset",
+        )
+
+        # 폴더 경로 정규화 (뒤의 / 제거)
+        folder_path = remote_folder_path.rstrip('/')
+
+        # 해당 폴더에 속한 모든 파일/폴더 찾기
+        operations = []
+        for item in tree_entries:
+            if item.path.startswith(folder_path + '/') or item.path == folder_path:
+                # blob_id가 None이면 폴더, 있으면 파일
+                if item.blob_id:  # 파일인 경우
+                    operations.append(CommitOperationDelete(path_in_repo=item.path))
+
+        # 파일들이 있으면 한 번에 삭제
+        if operations:
+            api.create_commit(
+                repo_id=HF_REPO,
+                operations=operations,
+                commit_message=commit_message,
+                token=HF_TOKEN,
+                repo_type="dataset",
+            )
+    except Exception as e:
+        print(f"폴더 삭제 중 오류: {remote_folder_path}, {e}")
+        raise
+
+
 # ----- UTILITIES ----- #
 
 

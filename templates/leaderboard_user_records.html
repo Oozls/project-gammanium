@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}의 기록 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     LEADERBOARD USER RECORDS PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container">
+
+    <!-- Back button -->
+    <a href="{{ url_for('record.leaderboard') }}" style="display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-primary); text-decoration: none; margin-bottom: var(--space-8); font-weight: var(--font-weight-medium);">
+      <i data-feather="chevron-left" style="width: 18px; height: 18px;"></i>
+      리더보드로
+    </a>
+
+    <!-- User profile header card -->
+    <div class="card card-warm" style="margin-bottom: var(--space-8);">
+      <div style="display: flex; align-items: flex-start; gap: var(--space-4); margin-bottom: var(--space-4);">
+        <!-- User avatar -->
+        <div style="flex-shrink: 0;">
+          {% if user and user.profile_image %}
+            <img
+              src="{{ url_for('settings.get_profile_image', user_id=user._id) }}"
+              alt="{{ user.username }}"
+              style="width: 80px; height: 80px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary);"
+              onerror="handleLeaderboardUserImageError(this, {{ user.username | tojson }})"
+            />
+          {% else %}
+            <div style="
+              width: 80px; height: 80px; border-radius: var(--radius-full);
+              background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+              display: flex; align-items: center; justify-content: center;
+              color: white; font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold);
+              border: 2px solid var(--color-primary);
+            ">
+              {{ user.username[0].upper() if user else '?' }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- User info -->
+        <div style="flex: 1;">
+          <h1 style="margin-bottom: var(--space-2); font-size: var(--font-size-2xl);">{{ user.username }}</h1>
+
+          <!-- Stats -->
+          <div style="display: flex; gap: var(--space-8);">
+            <div>
+              <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-1); font-weight: var(--font-weight-medium);">총 거리</p>
+              <p style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+                {{ "%.1f"|format(stats.total_distance) }} <span style="font-size: var(--font-size-md);">km</span>
+              </p>
+            </div>
+            <div>
+              <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-1); font-weight: var(--font-weight-medium);">승인된 기록</p>
+              <p style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-success);">
+                {{ stats.approved }}개
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Records section -->
+    <div style="margin-bottom: var(--space-8);">
+      <h2 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">승인된 기록</h2>
+
+      {% if records %}
+        <!-- Table wrapper -->
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+
+            <!-- Table header -->
+            <thead>
+              <tr style="border-bottom: 2px solid var(--color-border);">
+                <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                  날짜
+                </th>
+                <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                  거리
+                </th>
+                <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                  런닝 날짜
+                </th>
+              </tr>
+            </thead>
+
+            <!-- Table body -->
+            <tbody>
+              {% for record in records %}
+                <tr
+                  style="
+                    border-bottom: 1px solid var(--color-border);
+                    transition: background-color var(--transition-fast);
+                    cursor: pointer;
+                  "
+                  onclick="window.location.href='{{ url_for('record.public_record_detail', user_id=user._id, record_id=record._id) }}';"
+                  onmouseenter="this.style.backgroundColor='var(--color-surface-warm)';"
+                  onmouseleave="this.style.backgroundColor='transparent';"
+                >
+                  <td style="padding: var(--space-4); color: var(--color-text); font-size: var(--font-size-sm);">
+                    {{ record.date }}
+                  </td>
+                  <td style="padding: var(--space-4); color: var(--color-primary); font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm);">
+                    {{ record.distance }} km
+                  </td>
+                  <td style="padding: var(--space-4); color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                    {{ record.date }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+
+          </table>
+        </div>
+      {% else %}
+        <!-- Empty state -->
+        <div style="
+          background-color: var(--color-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          padding: var(--space-12) var(--space-8);
+          text-align: center;
+        ">
+          <div style="margin-bottom: var(--space-4);">
+            <i data-feather="inbox" style="width: 48px; height: 48px; color: var(--color-text-muted);"></i>
+          </div>
+          <h3 style="margin-bottom: var(--space-2); color: var(--color-text-muted);">승인된 기록이 없습니다</h3>
+          <p style="color: var(--color-text-muted); font-size: var(--font-size-sm);">
+            아직 승인된 기록이 없습니다
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Navigation buttons -->
+    <div style="display: flex; gap: var(--space-4);">
+      <a href="{{ url_for('record.leaderboard') }}" class="btn btn-ghost" style="display: inline-flex; align-items: center; gap: var(--space-2);">
+        <i data-feather="award"></i>
+        리더보드로
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  function handleLeaderboardUserImageError(imgEl, username) {
+    const parent = imgEl.parentElement;
+    parent.innerHTML = `
+      <div style="
+        width: 80px; height: 80px; border-radius: var(--radius-full);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold);
+        border: 2px solid var(--color-primary);
+      ">
+        ${username ? username[0].toUpperCase() : '?'}
+      </div>
+    `;
+  }
+
+  feather.replace();
+</script>
+
+{% endblock %}

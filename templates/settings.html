@@ -86,7 +86,7 @@
 
   function handleSettingsProfileImageError() {
     const preview = document.getElementById('profile-preview');
-    const username = '{{ current_user.username }}';
+    const username = {{ current_user.username | tojson }};
     const firstLetter = username.charAt(0).toUpperCase();
 
     preview.outerHTML = `

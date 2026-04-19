@@ -1,9 +1,11 @@
 # from database import is_account_present, obj
 from dotenv import load_dotenv
-from flask import Flask, render_template, get_flashed_messages
+from flask import Flask, render_template, get_flashed_messages, redirect, request, url_for
 from flask_cors import CORS
 from flask_login import LoginManager
 from os import getenv
+from html import escape
+import sys
 
 from .user import user_bp
 from .record import record_bp
@@ -15,12 +17,19 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.config['SECRET_KEY'] = getenv('SECRET_KEY', 'default-secret-key-change-in-production')
+
+secret_key = getenv('SECRET_KEY')
+if not secret_key:
+    print("CRITICAL: SECRET_KEY 환경변수가 설정되지 않았습니다. 운영 환경에서는 반드시 설정하세요.", file=sys.stderr)
+    secret_key = 'default-secret-key-change-in-production'
+app.config['SECRET_KEY'] = secret_key
+
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 app.template_folder = "../templates"
 app.static_folder = "../static"
 
-CORS(app)
+CORS(app, origins=["http://localhost:5000", "http://localhost:8000", "http://127.0.0.1:5000", "http://127.0.0.1:8000"])
 
 # Flask-Login 설정
 login_manager = LoginManager()
@@ -44,7 +53,7 @@ def inject_flash_messages():
 
     for category, message in messages:
         flash_type = category if category in ['success', 'error', 'info'] else 'info'
-        flash_html += f'<div data-flash-message="{message}" data-flash-type="{flash_type}" style="display:none;"></div>'
+        flash_html += f'<div data-flash-message="{escape(message)}" data-flash-type="{escape(flash_type)}" style="display:none;"></div>'
 
     return dict(flash_messages_html=flash_html)
 
@@ -57,6 +66,12 @@ app.register_blueprint(settings_bp)
 @app.route('/')
 def main_page():
     return render_template('index.html')
+
+@app.errorhandler(413)
+def request_entity_too_large(e):
+    from flask import flash
+    flash('파일 크기가 너무 큽니다 (최대 10MB)', 'error')
+    return redirect(request.referrer or url_for('main_page')), 413
 
 
 

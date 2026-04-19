@@ -33,7 +33,7 @@
                 <img src="{{ url_for('settings.get_profile_image', user_id=user._id) }}"
                      alt="{{ user.username }}"
                      style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-border); flex-shrink: 0;"
-                     onerror="handleAdminDetailImageError(this, '{{ user.username }}')">
+                     onerror="handleAdminDetailImageError(this, {{ user.username | tojson }})">
               {% else %}
                 <div class="admin-detail-avatar" data-username="{{ user.username if user else '?' }}" style="
                   width: 64px;

@@ -204,11 +204,9 @@ def update_user(user_id: str, update_data: dict) -> dict:
     _validate_credentials()
 
     try:
-        # _id와 password는 수정 불가
-        if "_id" in update_data:
-            del update_data["_id"]
-        if "password" in update_data:
-            del update_data["password"]
+        # _id, password, is_admin, username은 수정 불가
+        for blocked in ("_id", "password", "is_admin", "username"):
+            update_data.pop(blocked, None)
 
         # updated_at 자동 설정
         update_data["updated_at"] = datetime.utcnow()

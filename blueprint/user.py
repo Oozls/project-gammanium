@@ -2,6 +2,7 @@
 Flask-Login을 사용한 사용자 인증 라우트
 """
 
+import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +12,8 @@ from database.mongodb import (
     create_user,
 )
 from .user_model import User
+
+logger = logging.getLogger(__name__)
 
 user_bp = Blueprint('user', __name__)
 
@@ -35,12 +38,12 @@ def login():
             # 사용자 조회
             user_data = get_user_by_username(username)
             if not user_data:
-                flash('존재하지 않는 사용자입니다', 'error')
+                flash('아이디 또는 비밀번호가 올바르지 않습니다', 'error')
                 return render_template('login.html')
 
             # 비밀번호 확인
             if not check_password_hash(user_data['password'], password):
-                flash('비밀번호가 일치하지 않습니다', 'error')
+                flash('아이디 또는 비밀번호가 올바르지 않습니다', 'error')
                 return render_template('login.html')
 
             # User 객체 생성 및 로그인
@@ -56,7 +59,8 @@ def login():
             return redirect(url_for('main_page'))
 
         except Exception as e:
-            flash(f'로그인 중 오류가 발생했습니다: {str(e)}', 'error')
+            logger.exception('로그인 처리 오류')
+            flash('로그인 중 오류가 발생했습니다', 'error')
             return render_template('login.html')
 
     return render_template('login.html')
@@ -132,7 +136,8 @@ def signup():
             flash(str(e), 'error')
             return render_template('signup.html')
         except Exception as e:
-            flash(f'회원가입 중 오류가 발생했습니다: {str(e)}', 'error')
+            logger.exception('회원가입 처리 오류')
+            flash('회원가입 중 오류가 발생했습니다', 'error')
             return render_template('signup.html')
 
     return render_template('signup.html')

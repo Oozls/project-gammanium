@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}의 기록 상세 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     LEADERBOARD RECORD DETAIL PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container container-lg">
+
+    <!-- Back button -->
+    <a href="{{ url_for('record.public_user_records', user_id=user_id) }}" style="display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-primary); text-decoration: none; margin-bottom: var(--space-8); font-weight: var(--font-weight-medium);">
+      <i data-feather="chevron-left" style="width: 18px; height: 18px;"></i>
+      {{ user.username }}의 기록
+    </a>
+
+    <!-- Main content grid -->
+    <div class="detail-layout" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-8);">
+
+      <!-- Left column: Main details -->
+      <div>
+
+        <!-- Header card -->
+        <div class="card" style="margin-bottom: var(--space-6);">
+
+          <!-- Running stats -->
+          <div style="margin-bottom: var(--space-6);">
+            <div>
+              <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2);">거리</p>
+              <p style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-primary);">
+                {{ record.distance }} <span style="font-size: var(--font-size-lg);">km</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Status badge (always approved for public view) -->
+          <div style="display: flex; align-items: center; gap: var(--space-2);">
+            <span class="badge" style="font-size: var(--font-size-sm); padding: var(--space-2) var(--space-4); background-color: #F0FFF4; color: var(--color-success); border: 1px solid var(--color-success); border-radius: var(--radius-md); display: inline-flex; align-items: center; gap: var(--space-1);">
+              <i data-feather="check-circle" style="width: 14px; height: 14px;"></i>
+              승인됨
+            </span>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+              기록이 승인되었습니다
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Details card -->
+        <div class="card" style="margin-bottom: var(--space-6);">
+
+          <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">상세 정보</h3>
+
+          <!-- Info grid -->
+          <div class="info-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); row-gap: var(--space-4);">
+
+            <div>
+              <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2); font-weight: var(--font-weight-medium);">런닝 날짜</p>
+              <p style="font-size: var(--font-size-md); color: var(--color-text); font-weight: var(--font-weight-medium);">{{ record.date }}</p>
+            </div>
+
+            <div>
+              <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2); font-weight: var(--font-weight-medium);">제출 시간</p>
+              <p style="font-size: var(--font-size-md); color: var(--color-text); font-weight: var(--font-weight-medium);">
+                {% if record.submitted_at %}
+                  {{ record.submitted_at.strftime('%Y-%m-%d %H:%M') if record.submitted_at else 'N/A' }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </p>
+            </div>
+
+            <div>
+              <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2); font-weight: var(--font-weight-medium);">승인 시간</p>
+              <p style="font-size: var(--font-size-md); color: var(--color-text); font-weight: var(--font-weight-medium);">
+                {% if record.reviewed_at %}
+                  {{ record.reviewed_at.strftime('%Y-%m-%d %H:%M') if record.reviewed_at else 'N/A' }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Comment card -->
+        <div class="card" style="margin-bottom: var(--space-6);">
+
+          <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">코멘트</h3>
+
+          <div style="background-color: var(--color-surface-warm); padding: var(--space-4); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">
+            <p style="line-height: var(--line-height-relaxed); color: var(--color-text);">
+              {% if record.comment %}
+                {{ record.comment }}
+              {% else %}
+                <span style="color: var(--color-text-muted);">코멘트가 없습니다</span>
+              {% endif %}
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Evidence card -->
+        <div class="card">
+
+          <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">증거 이미지</h3>
+
+          <!-- Image -->
+          {% if record.evidence_image %}
+            <div style="margin-bottom: var(--space-4);">
+              <a href="{{ record.evidence_image }}" target="_blank" style="display: block; border-radius: var(--radius-lg); border: 1px solid var(--color-border); overflow: hidden;">
+                <img
+                  id="evidence-image"
+                  src="{{ url_for('record.get_public_record_image', record_id=record._id) }}"
+                  alt="증거 이미지"
+                  style="width: 100%; height: auto; display: block;"
+                  onerror="handleImageLoadError()"
+                />
+              </a>
+              <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); text-align: center; margin-top: var(--space-2);">
+                <a href="{{ record.evidence_image }}" target="_blank" style="color: var(--color-primary); text-decoration: none;">
+                  원본 이미지 보기
+                </a>
+              </p>
+            </div>
+          {% else %}
+            <div style="
+              background: linear-gradient(135deg, #F26522 0%, #E8A020 100%);
+              border-radius: var(--radius-lg);
+              padding: var(--space-20) var(--space-8);
+              text-align: center;
+              color: white;
+              margin-bottom: var(--space-4);
+            ">
+              <p style="font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold);">
+                증거 이미지 없음
+              </p>
+              <p style="font-size: var(--font-size-sm); opacity: 0.9;">
+                등록된 증거 이미지가 없습니다
+              </p>
+            </div>
+          {% endif %}
+
+        </div>
+
+      </div>
+
+      <!-- Right column: User info -->
+      <div>
+
+        <!-- User info card -->
+        <div class="card" style="position: sticky; top: calc(var(--navbar-height) + var(--space-4));">
+
+          <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">사용자 정보</h3>
+
+          <!-- User avatar -->
+          <div style="text-align: center; margin-bottom: var(--space-4);">
+            {% if user and user.profile_image %}
+              <img
+                src="{{ url_for('settings.get_profile_image', user_id=user._id) }}"
+                alt="{{ user.username }}"
+                style="width: 100px; height: 100px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary); margin: 0 auto var(--space-3); display: block;"
+                onerror="handleLeaderboardDetailImageError(this, {{ user.username | tojson }})"
+              />
+            {% else %}
+              <div style="
+                width: 100px; height: 100px; border-radius: var(--radius-full);
+                background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+                display: flex; align-items: center; justify-content: center;
+                color: white; font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold);
+                border: 2px solid var(--color-primary);
+                margin: 0 auto var(--space-3);
+              ">
+                {{ user.username[0].upper() if user else '?' }}
+              </div>
+            {% endif %}
+          </div>
+
+          <h2 style="text-align: center; margin-bottom: var(--space-3); font-size: var(--font-size-lg);">{{ user.username }}</h2>
+
+          <!-- Divider -->
+          <div style="height: 1px; background-color: var(--color-border); margin-bottom: var(--space-4);"></div>
+
+          <!-- Action buttons -->
+          <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+            <a href="{{ url_for('record.public_user_records', user_id=user_id) }}" class="btn btn-primary btn-lg" style="justify-content: center;">
+              <i data-feather="list"></i>
+              전체 기록 보기
+            </a>
+            <a href="{{ url_for('record.leaderboard') }}" class="btn btn-ghost btn-lg" style="justify-content: center;">
+              <i data-feather="award"></i>
+              리더보드
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  function handleImageLoadError() {
+    const imageEl = document.getElementById('evidence-image');
+    if (imageEl) {
+      const parent = imageEl.parentElement;
+      parent.innerHTML = `
+        <div style="
+          background: linear-gradient(135deg, #F26522 0%, #E8A020 100%);
+          border-radius: var(--radius-lg);
+          padding: var(--space-12) var(--space-8);
+          text-align: center;
+          color: white;
+        ">
+          <p style="font-size: var(--font-size-md); font-weight: var(--font-weight-semibold);">
+            이미지를 불러올 수 없습니다
+          </p>
+          <p style="font-size: var(--font-size-sm); opacity: 0.9;">
+            이미지 링크가 유효하지 않거나 접근할 수 없습니다.
+          </p>
+          <p style="font-size: var(--font-size-xs); margin-top: var(--space-3);">
+            <a href="{{ record.evidence_image }}" target="_blank" style="color: white; text-decoration: underline;">
+              직접 링크로 보기
+            </a>
+          </p>
+        </div>
+      `;
+    }
+  }
+
+  function handleLeaderboardDetailImageError(imgEl, username) {
+    const parent = imgEl.parentElement;
+    parent.innerHTML = `
+      <div style="
+        width: 100px; height: 100px; border-radius: var(--radius-full);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold);
+        border: 2px solid var(--color-primary);
+        margin: 0 auto var(--space-3);
+      ">
+        ${username ? username[0].toUpperCase() : '?'}
+      </div>
+    `;
+  }
+
+  feather.replace();
+</script>
+
+{% endblock %}
