@@ -93,6 +93,26 @@ def get_user_by_email(email: str) -> dict:
         return None
 
 
+def get_user_by_student_id(student_id: str) -> dict:
+    """
+    학번으로 사용자 정보를 조회합니다.
+
+    Args:
+        student_id: 학번
+
+    Returns:
+        사용자 정보 딕셔너리, 없으면 None
+    """
+    _validate_credentials()
+
+    try:
+        user = users_collection.find_one({"student_id": student_id})
+        return user
+    except Exception as e:
+        print(f"사용자 조회 중 오류: {e}")
+        return None
+
+
 # ============================================================================
 # 어드민 여부 조회
 # ============================================================================
@@ -135,6 +155,8 @@ def create_user(user_data: dict) -> dict:
             - username (str, 필수): 사용자명
             - email (str, 필수): 이메일
             - password (str, 필수): 비밀번호 (해시된 형태)
+            - student_id (str, 필수): 학번
+            - role (str, 필수): 역할 ('student' 또는 'teacher')
             - is_admin (bool, 선택): 어드민 여부 (기본값: False)
             - name (str, 선택): 사용자 이름
             - profile_image (str, 선택): 프로필 이미지 URL
@@ -159,6 +181,8 @@ def create_user(user_data: dict) -> dict:
         "username": user_data["username"],
         "email": user_data["email"],
         "password": user_data["password"],
+        "student_id": user_data.get("student_id"),
+        "role": user_data.get("role"),
         "is_admin": user_data.get("is_admin", False),
         "name": user_data.get("name", ""),
         "profile_image": user_data.get("profile_image", ""),
@@ -196,7 +220,7 @@ def update_user(user_id: str, update_data: dict) -> dict:
     Args:
         user_id: 사용자 ObjectId (문자열)
         update_data: 수정할 정보 딕셔너리
-            - email, name, profile_image, is_admin 등
+            - email, name, profile_image, student_id, role 등
 
     Returns:
         수정된 사용자 정보, 없으면 None

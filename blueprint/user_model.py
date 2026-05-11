@@ -9,12 +9,14 @@ from database.mongodb import get_user
 class User(UserMixin):
     """Flask-Login과 호환되는 User 클래스"""
 
-    def __init__(self, user_id, username, email, is_admin=False, profile_image=''):
+    def __init__(self, user_id, username, email, is_admin=False, profile_image='', student_id=None, role=None):
         self.id = user_id  # MongoDB ObjectId (문자열)
         self.username = username
         self.email = email
         self.is_admin = is_admin
         self.profile_image = profile_image
+        self.student_id = student_id  # 학번
+        self.role = role  # 'student' or 'teacher'
 
     def is_active(self):
         """사용자가 활성화되어 있는지 확인"""
@@ -40,6 +42,8 @@ class User(UserMixin):
                     email=user_data['email'],
                     is_admin=user_data.get('is_admin', False),
                     profile_image=user_data.get('profile_image', ''),
+                    student_id=user_data.get('student_id'),
+                    role=user_data.get('role'),
                 )
         except Exception as e:
             print(f"사용자 로드 중 오류: {e}")

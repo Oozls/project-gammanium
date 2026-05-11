@@ -180,7 +180,15 @@
             {% endif %}
           </div>
 
-          <h2 style="text-align: center; margin-bottom: var(--space-3); font-size: var(--font-size-lg);">{{ user.username }}</h2>
+          <h2 style="text-align: center; margin-bottom: var(--space-2); font-size: var(--font-size-lg);">{{ user.username }}</h2>
+
+          <p style="text-align: center; font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--space-4);">
+            {{ user.student_id if user.student_id else '-' }}
+            <span style="margin: 0 var(--space-1);">·</span>
+            <span style="color: {% if user.role == 'student' %}var(--color-primary){% else %}var(--color-accent){% endif %}; font-weight: var(--font-weight-medium);">
+              {{ '학생' if user.role == 'student' else '교사' if user.role else '-' }}
+            </span>
+          </p>
 
           <!-- Divider -->
           <div style="height: 1px; background-color: var(--color-border); margin-bottom: var(--space-4);"></div>

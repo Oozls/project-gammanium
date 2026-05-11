@@ -43,7 +43,14 @@
 
         <!-- User info -->
         <div style="flex: 1;">
-          <h1 style="margin-bottom: var(--space-2); font-size: var(--font-size-2xl);">{{ user.username }}</h1>
+          <h1 style="margin: 0 0 var(--space-2) 0; font-size: var(--font-size-2xl);">{{ user.username }}</h1>
+          <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0 0 var(--space-3) 0;">
+            {{ user.student_id if user.student_id else '-' }}
+            <span style="margin: 0 var(--space-1);">·</span>
+            <span style="color: {% if user.role == 'student' %}var(--color-primary){% else %}var(--color-accent){% endif %}; font-weight: var(--font-weight-medium);">
+              {{ '학생' if user.role == 'student' else '교사' if user.role else '-' }}
+            </span>
+          </p>
 
           <!-- Stats -->
           <div style="display: flex; gap: var(--space-8);">

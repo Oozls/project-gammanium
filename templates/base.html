@@ -73,45 +73,185 @@
           {% if current_user.is_authenticated %}
             <!-- Logged in user -->
             <div style="display: flex; align-items: center; gap: var(--space-3);">
-              <!-- Profile image and username -->
-              <a href="{{ url_for('settings.settings_page') }}" style="display: flex; align-items: center; gap: var(--space-2); text-decoration: none;">
-                {% if current_user.profile_image %}
-                  <img src="{{ url_for('settings.get_profile_image', user_id=current_user.id) }}"
-                       alt="{{ current_user.username }}"
-                       style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border);"
-                       onerror="handleProfileImageError(this)">
-                {% else %}
-                  <div id="profile-avatar-navbar" style="
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    font-size: var(--font-size-sm);
-                    font-weight: var(--font-weight-bold);
-                    border: 1px solid var(--color-border);
-                  ">
-                    {{ current_user.username[0] | upper }}
+              <!-- Profile popover -->
+              <div style="position: relative;">
+                <button id="profile-btn" style="
+                  display: flex;
+                  align-items: center;
+                  gap: var(--space-2);
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  padding: var(--space-2);
+                  margin: calc(var(--space-2) * -1);
+                  border-radius: var(--radius-md);
+                  transition: background-color var(--transition-fast);
+                " onmouseenter="this.style.backgroundColor='var(--color-surface-light)'" onmouseleave="this.style.backgroundColor='transparent'">
+                  {% if current_user.profile_image %}
+                    <img src="{{ url_for('settings.get_profile_image', user_id=current_user.id) }}"
+                         alt="{{ current_user.username }}"
+                         style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border);"
+                         onerror="handleProfileImageError(this)">
+                  {% else %}
+                    <div style="
+                      width: 36px;
+                      height: 36px;
+                      border-radius: 50%;
+                      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      color: white;
+                      font-size: var(--font-size-sm);
+                      font-weight: var(--font-weight-bold);
+                      border: 1px solid var(--color-border);
+                      flex-shrink: 0;
+                    ">
+                      {{ current_user.username[0] | upper }}
+                    </div>
+                  {% endif %}
+                  <div style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1);">
+                    <span style="font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text);">
+                      {{ current_user.username }}
+                    </span>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                      {{ current_user.student_id if current_user.student_id else '-' }}
+                      <span style="margin: 0 var(--space-1);">·</span>
+                      <span style="color: {% if current_user.role == 'student' %}var(--color-primary){% else %}var(--color-accent){% endif %};">
+                        {{ '학생' if current_user.role == 'student' else '교사' if current_user.role else '-' }}
+                      </span>
+                    </span>
                   </div>
-                {% endif %}
-                <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                  {{ current_user.username }}
-                </span>
-              </a>
+                  <i id="profile-chevron" data-feather="chevron-down" style="width: 16px; height: 16px; color: var(--color-text-secondary); margin-left: var(--space-2); transition: transform var(--transition-fast);"></i>
+                </button>
 
-              <a href="{{ url_for('user.logout') }}" class="btn btn-ghost btn-sm">
-                <i data-feather="log-out"></i>
-                로그아웃
-              </a>
-              {% if current_user.is_admin %}
-                <a href="/admin/records" class="btn btn-primary btn-sm">
-                  <i data-feather="settings"></i>
-                  관리자
-                </a>
-              {% endif %}
+                <!-- Profile popover card -->
+                <div id="profile-popover" style="
+                  position: absolute;
+                  top: 100%;
+                  right: 0;
+                  margin-top: var(--space-2);
+                  background: white;
+                  border: 1px solid var(--color-border);
+                  border-radius: var(--radius-lg);
+                  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                  min-width: 280px;
+                  z-index: 1000;
+                  display: none;
+                  overflow: hidden;
+                  opacity: 0;
+                  transform: translateY(-10px) scale(0.95);
+                  pointer-events: none;
+                  transition: opacity var(--transition-fast), transform var(--transition-fast), pointer-events var(--transition-fast);
+                ">
+                  <!-- Profile header -->
+                  <div style="padding: var(--space-6); background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-surface-warm) 100%); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--space-4);">
+                    {% if current_user.profile_image %}
+                      <img src="{{ url_for('settings.get_profile_image', user_id=current_user.id) }}"
+                           alt="{{ current_user.username }}"
+                           style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid white;"
+                           onerror="handleProfileImageError(this)">
+                    {% else %}
+                      <div style="
+                        width: 56px;
+                        height: 56px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: var(--font-size-lg);
+                        font-weight: var(--font-weight-bold);
+                        border: 2px solid white;
+                      ">
+                        {{ current_user.username[0] | upper }}
+                      </div>
+                    {% endif %}
+                    <div style="flex: 1;">
+                      <h4 style="margin: 0 0 var(--space-1) 0; font-size: var(--font-size-md); font-weight: var(--font-weight-semibold);">
+                        {{ current_user.username }}
+                      </h4>
+                      <p style="margin: 0; font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                        {{ current_user.email }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Profile info -->
+                  <div style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                      <div>
+                        <p style="margin: 0 0 var(--space-2) 0; font-size: var(--font-size-xs); color: var(--color-text-muted); font-weight: var(--font-weight-medium);">학번</p>
+                        <p style="margin: 0; font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold);">
+                          {{ current_user.student_id if current_user.student_id else '-' }}
+                        </p>
+                      </div>
+                      <div>
+                        <p style="margin: 0 0 var(--space-2) 0; font-size: var(--font-size-xs); color: var(--color-text-muted); font-weight: var(--font-weight-medium);">역할</p>
+                        <p style="margin: 0; font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: {% if current_user.role == 'student' %}var(--color-primary){% else %}var(--color-accent){% endif %};">
+                          {{ '학생' if current_user.role == 'student' else '교사' if current_user.role else '-' }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div style="padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2);">
+                    <a href="{{ url_for('settings.settings_page') }}" style="
+                      display: flex;
+                      align-items: center;
+                      gap: var(--space-3);
+                      padding: var(--space-3);
+                      text-decoration: none;
+                      color: var(--color-text);
+                      border-radius: var(--radius-md);
+                      transition: background-color var(--transition-fast);
+                      font-size: var(--font-size-sm);
+                      font-weight: var(--font-weight-medium);
+                    " onmouseenter="this.style.backgroundColor='var(--color-surface-light)'" onmouseleave="this.style.backgroundColor='transparent'">
+                      <i data-feather="settings" style="width: 18px; height: 18px;"></i>
+                      프로필 설정
+                    </a>
+                  </div>
+
+                  <!-- Footer: Admin & Logout -->
+                  <div style="padding: var(--space-3); border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: var(--space-2);">
+                    {% if current_user.is_admin %}
+                      <a href="/admin/records" style="
+                        display: flex;
+                        align-items: center;
+                        gap: var(--space-3);
+                        padding: var(--space-3);
+                        text-decoration: none;
+                        color: var(--color-primary);
+                        border-radius: var(--radius-md);
+                        transition: background-color var(--transition-fast);
+                        font-size: var(--font-size-sm);
+                        font-weight: var(--font-weight-medium);
+                      " onmouseenter="this.style.backgroundColor='rgba(212, 119, 66, 0.1)'" onmouseleave="this.style.backgroundColor='transparent'">
+                        <i data-feather="shield" style="width: 18px; height: 18px;"></i>
+                        관리자 패널
+                      </a>
+                    {% endif %}
+                    <a href="{{ url_for('user.logout') }}" style="
+                      display: flex;
+                      align-items: center;
+                      gap: var(--space-3);
+                      padding: var(--space-3);
+                      text-decoration: none;
+                      color: var(--color-text-secondary);
+                      border-radius: var(--radius-md);
+                      transition: background-color var(--transition-fast);
+                      font-size: var(--font-size-sm);
+                      font-weight: var(--font-weight-medium);
+                    " onmouseenter="this.style.backgroundColor='var(--color-surface-light)'" onmouseleave="this.style.backgroundColor='transparent'">
+                      <i data-feather="log-out" style="width: 18px; height: 18px;"></i>
+                      로그아웃
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           {% else %}
             <!-- Not logged in -->
@@ -168,36 +308,53 @@
     <!-- Auth actions (mirrors .navbar-actions) -->
     <div class="mobile-nav-actions">
       {% if current_user.is_authenticated %}
-        <!-- Identity row -->
-        <div class="mobile-nav-user">
-          {% if current_user.profile_image %}
-            <img src="{{ url_for('settings.get_profile_image', user_id=current_user.id) }}"
-                 alt="{{ current_user.username }}"
-                 style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border);"
-                 onerror="handleProfileImageError(this)">
-          {% else %}
-            <div style="
-              width: 36px; height: 36px; border-radius: 50%;
-              background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-              display: flex; align-items: center; justify-content: center;
-              color: white; font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);
-              border: 1px solid var(--color-border); flex-shrink: 0;
-            ">{{ current_user.username[0] | upper }}</div>
-          {% endif %}
-          <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary); font-weight: var(--font-weight-medium);">
-            {{ current_user.username }}
-          </span>
+        <!-- Mobile user profile card -->
+        <div style="padding: var(--space-4); background-color: var(--color-surface-warm); border-radius: var(--radius-md); margin-bottom: var(--space-4);">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+            {% if current_user.profile_image %}
+              <img src="{{ url_for('settings.get_profile_image', user_id=current_user.id) }}"
+                   alt="{{ current_user.username }}"
+                   style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid white;"
+                   onerror="handleProfileImageError(this)">
+            {% else %}
+              <div style="
+                width: 48px; height: 48px; border-radius: 50%;
+                background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+                display: flex; align-items: center; justify-content: center;
+                color: white; font-size: var(--font-size-md); font-weight: var(--font-weight-bold);
+                border: 2px solid white; flex-shrink: 0;
+              ">{{ current_user.username[0] | upper }}</div>
+            {% endif %}
+            <div style="flex: 1;">
+              <p style="margin: 0 0 var(--space-1) 0; font-weight: var(--font-weight-semibold); color: var(--color-text);">
+                {{ current_user.username }}
+              </p>
+              <p style="margin: 0; font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                {{ current_user.student_id if current_user.student_id else '-' }}
+                <span style="margin: 0 var(--space-1);">·</span>
+                <span style="color: {% if current_user.role == 'student' %}var(--color-primary){% else %}var(--color-accent){% endif %};">
+                  {{ '학생' if current_user.role == 'student' else '교사' if current_user.role else '-' }}
+                </span>
+              </p>
+            </div>
+          </div>
+          <a href="{{ url_for('settings.settings_page') }}" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">
+            <i data-feather="settings"></i>
+            프로필 설정
+          </a>
         </div>
-        <a href="{{ url_for('user.logout') }}" class="btn btn-ghost btn-sm">
+
+        {% if current_user.is_admin %}
+          <a href="/admin/records" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; margin-bottom: var(--space-2);">
+            <i data-feather="shield"></i>
+            관리자 패널
+          </a>
+        {% endif %}
+
+        <a href="{{ url_for('user.logout') }}" class="btn btn-ghost btn-sm" style="width: 100%; justify-content: center;">
           <i data-feather="log-out"></i>
           로그아웃
         </a>
-        {% if current_user.is_admin %}
-          <a href="/admin/records" class="btn btn-primary btn-sm">
-            <i data-feather="settings"></i>
-            관리자
-          </a>
-        {% endif %}
       {% else %}
         <a href="{{ url_for('user.login') }}" class="btn btn-ghost btn-sm">
           <i data-feather="log-in"></i>
@@ -370,6 +527,64 @@
         }
       });
     });
+
+    // Profile popover toggle (click only)
+    (function () {
+      const profileBtn = document.getElementById('profile-btn');
+      const profilePopover = document.getElementById('profile-popover');
+      const profileChevron = document.getElementById('profile-chevron');
+
+      if (!profileBtn || !profilePopover) return;
+
+      function showPopover() {
+        profilePopover.style.display = 'block';
+        // Trigger reflow to enable transition
+        profilePopover.offsetHeight;
+        profilePopover.style.opacity = '1';
+        profilePopover.style.transform = 'translateY(0) scale(1)';
+        profilePopover.style.pointerEvents = 'auto';
+        if (profileChevron) {
+          profileChevron.style.transform = 'rotate(180deg)';
+        }
+      }
+
+      function hidePopover() {
+        profilePopover.style.opacity = '0';
+        profilePopover.style.transform = 'translateY(-10px) scale(0.95)';
+        profilePopover.style.pointerEvents = 'none';
+        if (profileChevron) {
+          profileChevron.style.transform = 'rotate(0deg)';
+        }
+        // Hide after animation
+        setTimeout(() => {
+          profilePopover.style.display = 'none';
+        }, 150);
+      }
+
+      function isPopoverOpen() {
+        return profilePopover.style.opacity === '1';
+      }
+
+      // Toggle on button click
+      profileBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isPopoverOpen()) {
+          hidePopover();
+        } else {
+          showPopover();
+        }
+      });
+
+      // Close when clicking outside
+      document.addEventListener('click', function (e) {
+        if (!profileBtn.contains(e.target) && !profilePopover.contains(e.target)) {
+          if (isPopoverOpen()) {
+            hidePopover();
+          }
+        }
+      });
+    }());
 
     // Mobile nav toggle
     (function () {

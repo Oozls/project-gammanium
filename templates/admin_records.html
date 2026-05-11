@@ -135,7 +135,14 @@
                     <div style="font-weight: var(--font-weight-medium); color: var(--color-text); margin-bottom: var(--space-1);">
                       {{ record.user_info.username if record.user_info else '알 수 없음' }}
                     </div>
-                    <p style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                    <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0 0 var(--space-1) 0;">
+                      {{ record.user_info.student_id if record.user_info and record.user_info.student_id else '-' }}
+                      <span style="margin: 0 var(--space-1);">·</span>
+                      <span style="color: {% if record.user_info and record.user_info.role == 'student' %}var(--color-primary){% else %}var(--color-accent){% endif %}; font-weight: var(--font-weight-medium);">
+                        {{ '학생' if record.user_info and record.user_info.role == 'student' else '교사' if record.user_info and record.user_info.role else '-' }}
+                      </span>
+                    </p>
+                    <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0;">
                       {{ record.user_info.email if record.user_info else '' }}
                     </p>
                   </td>

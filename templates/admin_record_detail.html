@@ -53,11 +53,18 @@
               {% endif %}
               <div style="flex: 1;">
                 <h2 style="margin-bottom: var(--space-1);">{{ user.username if user else '알 수 없음' }}</h2>
+                <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--space-2);">
+                  {{ user.student_id if user and user.student_id else '-' }}
+                  <span style="margin: 0 var(--space-1);">·</span>
+                  <span style="color: {% if user and user.role == 'student' %}var(--color-primary){% else %}var(--color-accent){% endif %}; font-weight: var(--font-weight-medium);">
+                    {{ '학생' if user and user.role == 'student' else '교사' if user and user.role else '-' }}
+                  </span>
+                </p>
                 <p style="color: var(--color-text-secondary); margin-bottom: var(--space-2);">
                   {{ user.email if user else '' }}
                 </p>
                 {% if user and user.created_at %}
-                  <p style="font-size: var(--font-size-sm); color: var(--color-text-muted);">
+                  <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">
                     가입일: {{ user.created_at.strftime('%Y-%m-%d') }}
                   </p>
                 {% endif %}
