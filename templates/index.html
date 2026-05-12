@@ -74,14 +74,14 @@
     <div class="section-header">
       <div class="accent-line mx-auto"></div>
       <h2>기록 등록 과정</h2>
-      <p>5단계로 간단하게 기록하세요</p>
+      <p>4단계로 간단하게 기록하세요</p>
     </div>
 
     <!-- Steps grid -->
     <div class="grid gap-8" style="max-width: 1200px; margin-left: auto; margin-right: auto;">
 
       <!-- Step 1 -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-8); align-items: center;">
         <div>
           <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
             <span style="
@@ -114,12 +114,12 @@
           align-items: center;
           justify-content: center;
         ">
-          <img src="/placeholder/step1.jpg" alt="Step 1: 거리와 날짜 입력" style="max-width: 100%; border-radius: var(--radius-md);" />
+          <img src="/static/img/guide/1.png" alt="Step 1: 거리와 날짜 입력" style="max-width: 100%; border-radius: var(--radius-md);" />
         </div>
       </div>
 
       <!-- Step 2 -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-8); align-items: center;">
         <div style="
           background-color: var(--color-bg);
           border: 1px solid var(--color-border);
@@ -131,9 +131,8 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          order: -1;
         ">
-          <img src="/placeholder/step2.jpg" alt="Step 2: 증거 사진 첨부" style="max-width: 100%; border-radius: var(--radius-md);" />
+          <img src="/static/img/guide/2.png" alt="Step 2: 증거 사진 첨부" style="max-width: 100%; border-radius: var(--radius-md);" />
         </div>
         <div>
           <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
@@ -158,7 +157,7 @@
       </div>
 
       <!-- Step 3 -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-8); align-items: center;">
         <div>
           <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
             <span style="
@@ -173,10 +172,10 @@
               font-weight: var(--font-weight-bold);
               font-size: var(--font-size-lg);
             ">3</span>
-            <h3 style="margin: 0; font-size: var(--font-size-lg);">관리자 검토</h3>
+            <h3 style="margin: 0; font-size: var(--font-size-lg);">관리자 검토 & 기록 승인</h3>
           </div>
           <p style="color: var(--color-text-secondary); margin: 0;">
-            제출된 기록이 관리자에 의해 검토됩니다. 명확한 기준에 따라 공정하게 심사됩니다.
+            제출된 기록이 관리자에 의해 검토되고 승인됩니다. 명확한 기준에 따라 공정하게 심사되며, 승인되면 즉시 리더보드에 반영됩니다.
           </p>
         </div>
         <div style="
@@ -191,12 +190,12 @@
           align-items: center;
           justify-content: center;
         ">
-          <img src="/placeholder/step3.jpg" alt="Step 3: 관리자 검토" style="max-width: 100%; border-radius: var(--radius-md);" />
+          <img src="/static/img/guide/3.png" alt="Step 3: 관리자 검토 & 기록 승인" style="max-width: 100%; border-radius: var(--radius-md);" />
         </div>
       </div>
 
       <!-- Step 4 -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-8); align-items: center;">
         <div style="
           background-color: var(--color-bg);
           border: 1px solid var(--color-border);
@@ -208,34 +207,9 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          order: -1;
         ">
-          <img src="/placeholder/step4.jpg" alt="Step 4: 기록 승인" style="max-width: 100%; border-radius: var(--radius-md);" />
+          <img src="/static/img/guide/4.png" alt="Step 4: 리더보드에서 확인" style="max-width: 100%; border-radius: var(--radius-md);" />
         </div>
-        <div>
-          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
-            <span style="
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 40px;
-              height: 40px;
-              border-radius: 50%;
-              background: linear-gradient(135deg, #4ECDC4 0%, #3DB8A8 100%);
-              color: white;
-              font-weight: var(--font-weight-bold);
-              font-size: var(--font-size-lg);
-            ">4</span>
-            <h3 style="margin: 0; font-size: var(--font-size-lg);">기록 승인</h3>
-          </div>
-          <p style="color: var(--color-text-secondary); margin: 0;">
-            검토 후 승인되면 당신의 기록이 리더보드에 반영됩니다. 실시간으로 순위가 업데이트됩니다.
-          </p>
-        </div>
-      </div>
-
-      <!-- Step 5 -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center;">
         <div>
           <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
             <span style="
@@ -249,26 +223,12 @@
               color: white;
               font-weight: var(--font-weight-bold);
               font-size: var(--font-size-lg);
-            ">5</span>
+            ">4</span>
             <h3 style="margin: 0; font-size: var(--font-size-lg);">리더보드에서 확인</h3>
           </div>
           <p style="color: var(--color-text-secondary); margin: 0;">
             리더보드에서 당신의 성과를 확인하세요. 더 많이 달릴수록 더 높은 순위를 얻을 수 있습니다.
           </p>
-        </div>
-        <div style="
-          background-color: var(--color-bg);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-lg);
-          padding: var(--space-6);
-          text-align: center;
-          color: var(--color-text-muted);
-          min-height: 240px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">
-          <img src="/placeholder/step5.jpg" alt="Step 5: 리더보드 확인" style="max-width: 100%; border-radius: var(--radius-md);" />
         </div>
       </div>
 
