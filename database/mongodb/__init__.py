@@ -2,6 +2,7 @@
 from .user import (
     get_user,
     get_user_by_username,
+    get_user_by_name,
     get_user_by_email,
     is_admin,
     create_user,
@@ -26,12 +27,14 @@ from .record import (
     get_user_record_stats,
     get_global_stats,
     get_leaderboard,
+    get_class_leaderboard,
 )
 
 __all__ = [
     # User 함수
     "get_user",
     "get_user_by_username",
+    "get_user_by_name",
     "get_user_by_email",
     "is_admin",
     "create_user",
@@ -53,4 +56,5 @@ __all__ = [
     "get_user_record_stats",
     "get_global_stats",
     "get_leaderboard",
+    "get_class_leaderboard",
 ]

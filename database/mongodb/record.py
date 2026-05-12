@@ -464,6 +464,78 @@ def get_leaderboard(limit: int = None, start_date=None, end_date=None) -> list:
         return []
 
 
+def get_class_leaderboard(start_date=None, end_date=None) -> dict:
+    """
+    반별 리더보드를 조회합니다 (학번 기준).
+
+    학번 형식: [123]0[1-8](0[1-9]|[1-2][0-9]|3[0-9])
+    - 1번째 자리: 학년 (1, 2, 3)
+    - 3번째 자리: 반 (1-8)
+
+    Returns:
+        반별 통계 딕셔너리
+        {
+            "1-1": {"total_distance": float, "count": int},
+            ...
+            "3-8": {"total_distance": float, "count": int}
+        }
+    """
+    _validate_credentials()
+
+    try:
+        from database.mongodb.user import get_user
+
+        # 기본 match 조건: 승인된 기록만
+        match_stage = {"status": "approved"}
+
+        # 날짜 필터링 추가
+        if start_date or end_date:
+            date_filter = {}
+            if start_date:
+                date_filter["$gte"] = start_date
+            if end_date:
+                date_filter["$lte"] = end_date
+            match_stage["submitted_at"] = date_filter
+
+        # 승인된 기록 조회
+        records = list(records_collection.find(match_stage))
+
+        # 반별 통계 계산
+        class_stats = {}
+        for grade in range(1, 4):
+            for cls in range(1, 9):
+                class_key = f"{grade}-{cls}"
+                class_stats[class_key] = {"total_distance": 0, "count": 0, "participants": set()}
+
+        # 각 기록에서 사용자의 학번을 조회하고 반별로 집계
+        for record in records:
+            try:
+                user = get_user(str(record['user_id']))
+                if user and user.get('student_id'):
+                    student_id = user['student_id']
+                    if len(student_id) >= 3:
+                        grade = int(student_id[0])
+                        cls = int(student_id[2])
+
+                        if 1 <= grade <= 3 and 1 <= cls <= 8:
+                            class_key = f"{grade}-{cls}"
+                            class_stats[class_key]['total_distance'] += record['distance']
+                            class_stats[class_key]['count'] += 1
+                            class_stats[class_key]['participants'].add(str(record['user_id']))
+            except (ValueError, KeyError, IndexError):
+                continue
+
+        # Set을 정수로 변환
+        for class_key in class_stats:
+            class_stats[class_key]['participants'] = len(class_stats[class_key]['participants'])
+
+        return class_stats
+
+    except Exception as e:
+        print(f"반별 리더보드 조회 중 오류: {e}")
+        return {}
+
+
 if __name__ == "__main__":
     # 테스트 코드
     try:

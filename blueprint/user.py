@@ -9,6 +9,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.mongodb.user import (
     get_user_by_username,
+    get_user_by_name,
     get_user_by_email,
     create_user,
     get_user_by_student_id,
@@ -30,17 +31,17 @@ def login():
         return redirect(url_for('main_page'))
 
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
+        name = request.form.get('name', '').strip()
         password = request.form.get('password', '').strip()
 
         # 입력 검증
-        if not username or not password:
-            flash('사용자명과 비밀번호를 입력해주세요', 'error')
+        if not name or not password:
+            flash('실명과 비밀번호를 입력해주세요', 'error')
             return render_template('login.html')
 
         try:
             # 사용자 조회
-            user_data = get_user_by_username(username)
+            user_data = get_user_by_name(name)
             if not user_data:
                 flash('아이디 또는 비밀번호가 올바르지 않습니다', 'error')
                 return render_template('login.html')
@@ -58,6 +59,8 @@ def login():
                 is_admin=user_data.get('is_admin', False),
                 student_id=user_data.get('student_id'),
                 role=user_data.get('role'),
+                bio=user_data.get('bio', ''),
+                name=user_data.get('name', ''),
             )
             login_user(user)
 
@@ -85,6 +88,7 @@ def signup():
         return redirect(url_for('main_page'))
 
     if request.method == 'POST':
+        name = request.form.get('name', '').strip()
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '').strip()
@@ -93,8 +97,12 @@ def signup():
         student_id = request.form.get('student_id', '').strip()
 
         # 입력 검증
-        if not username or not email or not password or not password_confirm or not role or not student_id:
+        if not name or not username or not email or not password or not password_confirm or not role:
             flash('모든 필드를 입력해주세요', 'error')
+            return render_template('signup.html')
+
+        if len(name) < 2:
+            flash('실명은 2자 이상이어야 합니다', 'error')
             return render_template('signup.html')
 
         if len(username) < 3:
@@ -114,15 +122,22 @@ def signup():
             flash('올바른 역할을 선택해주세요', 'error')
             return render_template('signup.html')
 
-        # 학번 검증 (역할이 학생이면 정규식 적용)
+        # 학번 검증 (역할이 학생이면 필수 및 정규식 적용, 교사면 선택사항)
         student_id_pattern = r'^[123]0[1-8](0[1-9]|[1-2][0-9]|3[0-9])$'
         if role == 'student':
+            if not student_id:
+                flash('학번을 입력해주세요', 'error')
+                return render_template('signup.html')
             if not re.match(student_id_pattern, student_id):
                 flash('학번 형식이 올바르지 않습니다 (예: 30209)', 'error')
                 return render_template('signup.html')
 
         try:
             # 중복 확인
+            if get_user_by_name(name):
+                flash('이미 등록된 실명입니다', 'error')
+                return render_template('signup.html')
+
             if get_user_by_username(username):
                 flash('이미 사용 중인 사용자명입니다', 'error')
                 return render_template('signup.html')
@@ -131,7 +146,8 @@ def signup():
                 flash('이미 등록된 이메일입니다', 'error')
                 return render_template('signup.html')
 
-            if get_user_by_student_id(student_id):
+            # 학번 중복 확인 (학생일 때만)
+            if role == 'student' and get_user_by_student_id(student_id):
                 flash('이미 등록된 학번입니다', 'error')
                 return render_template('signup.html')
 
@@ -140,13 +156,13 @@ def signup():
 
             # 사용자 등록
             user_data = {
+                'name': name,
                 'username': username,
                 'email': email,
                 'password': hashed_password,
                 'is_admin': False,
-                'name': username,
                 'profile_image': '',
-                'student_id': student_id,
+                'student_id': student_id if role == 'student' else '',
                 'role': role,
             }
             new_user = create_user(user_data)
@@ -159,6 +175,8 @@ def signup():
                 is_admin=new_user.get('is_admin', False),
                 student_id=new_user.get('student_id'),
                 role=new_user.get('role'),
+                bio=new_user.get('bio', ''),
+                name=new_user.get('name', ''),
             )
             login_user(user)
 
@@ -191,8 +209,8 @@ def complete_profile():
         student_id = request.form.get('student_id', '').strip()
 
         # 입력 검증
-        if not role or not student_id:
-            flash('모든 필드를 입력해주세요', 'error')
+        if not role:
+            flash('역할을 선택해주세요', 'error')
             return render_template('complete_profile.html')
 
         # 역할 검증
@@ -200,28 +218,33 @@ def complete_profile():
             flash('올바른 역할을 선택해주세요', 'error')
             return render_template('complete_profile.html')
 
-        # 학번 검증 (역할이 학생이면 정규식 적용)
+        # 학번 검증 (역할이 학생이면 필수 및 정규식 적용)
         student_id_pattern = r'^[123]0[1-8](0[1-9]|[1-2][0-9]|3[0-9])$'
         if role == 'student':
+            if not student_id:
+                flash('학번을 입력해주세요', 'error')
+                return render_template('complete_profile.html')
             if not re.match(student_id_pattern, student_id):
                 flash('학번 형식이 올바르지 않습니다 (예: 30209)', 'error')
                 return render_template('complete_profile.html')
 
         try:
-            # 학번 중복 확인
-            existing_user = get_user_by_student_id(student_id)
-            if existing_user:
-                flash('이미 등록된 학번입니다', 'error')
-                return render_template('complete_profile.html')
+            # 학번 중복 확인 (학생일 때만)
+            if role == 'student':
+                existing_user = get_user_by_student_id(student_id)
+                if existing_user:
+                    flash('이미 등록된 학번입니다', 'error')
+                    return render_template('complete_profile.html')
 
             # 사용자 정보 업데이트
-            update_user(str(current_user.id), {
-                'student_id': student_id,
+            update_data = {
                 'role': role,
-            })
+                'student_id': student_id if role == 'student' else '',
+            }
+            update_user(str(current_user.id), update_data)
 
             # 세션의 current_user 정보 업데이트
-            current_user.student_id = student_id
+            current_user.student_id = student_id if role == 'student' else ''
             current_user.role = role
 
             flash('프로필 정보가 저장되었습니다', 'success')

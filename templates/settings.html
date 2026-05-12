@@ -18,6 +18,33 @@
       </p>
     </div>
 
+    <!-- Username section -->
+    <div class="card" style="margin-bottom: var(--space-8);">
+      <h3 style="margin-bottom: var(--space-6); font-size: var(--font-size-lg);">사용자명</h3>
+
+      <form method="POST" action="{{ url_for('settings.update_username') }}">
+        <div class="form-group">
+          <label class="form-label">사용자명 (닉네임)</label>
+          <input
+            type="text"
+            name="username"
+            class="form-input"
+            value="{{ current_user.username }}"
+            placeholder="사용자명"
+            style="width: 100%;"
+          />
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-2);">
+            3자 이상의 영문, 숫자, 언더스코어, 한글 사용 가능
+          </p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+          <i data-feather="save"></i>
+          저장
+        </button>
+      </form>
+    </div>
+
     <!-- Profile image section -->
     <div class="card">
       <h3 style="margin-bottom: var(--space-6); font-size: var(--font-size-lg);">프로필 사진</h3>
@@ -74,6 +101,31 @@
         <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
           <i data-feather="upload"></i>
           사진 업로드
+        </button>
+      </form>
+    </div>
+
+    <!-- Bio section -->
+    <div class="card" style="margin-top: var(--space-8);">
+      <h3 style="margin-bottom: var(--space-6); font-size: var(--font-size-lg);">자기 소개</h3>
+
+      <form method="POST" action="{{ url_for('settings.update_bio') }}">
+        <div class="form-group">
+          <label class="form-label">자기 소개</label>
+          <textarea
+            name="bio"
+            class="form-input"
+            placeholder="자기 소개를 입력해주세요 (선택사항)"
+            style="resize: vertical; min-height: 120px; font-family: inherit;"
+            maxlength="500">{{ current_user.bio if current_user.bio else '' }}</textarea>
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-2);">
+            최대 500자까지 입력 가능합니다
+          </p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+          <i data-feather="save"></i>
+          저장
         </button>
       </form>
     </div>

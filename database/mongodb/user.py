@@ -73,6 +73,26 @@ def get_user_by_username(username: str) -> dict:
         return None
 
 
+def get_user_by_name(name: str) -> dict:
+    """
+    실명으로 사용자 정보를 조회합니다.
+
+    Args:
+        name: 사용자의 실명
+
+    Returns:
+        사용자 정보 딕셔너리, 없으면 None
+    """
+    _validate_credentials()
+
+    try:
+        user = users_collection.find_one({"name": name})
+        return user
+    except Exception as e:
+        print(f"사용자 조회 중 오류: {e}")
+        return None
+
+
 def get_user_by_email(email: str) -> dict:
     """
     이메일로 사용자 정보를 조회합니다.
@@ -152,13 +172,13 @@ def create_user(user_data: dict) -> dict:
 
     Args:
         user_data: 사용자 정보 딕셔너리
-            - username (str, 필수): 사용자명
+            - name (str, 필수): 실명
+            - username (str, 필수): 사용자명 (닉네임)
             - email (str, 필수): 이메일
             - password (str, 필수): 비밀번호 (해시된 형태)
-            - student_id (str, 필수): 학번
             - role (str, 필수): 역할 ('student' 또는 'teacher')
+            - student_id (str, 선택): 학번
             - is_admin (bool, 선택): 어드민 여부 (기본값: False)
-            - name (str, 선택): 사용자 이름
             - profile_image (str, 선택): 프로필 이미지 URL
 
     Returns:
@@ -171,7 +191,7 @@ def create_user(user_data: dict) -> dict:
     _validate_credentials()
 
     # 필수 필드 검증
-    required_fields = ["username", "email", "password"]
+    required_fields = ["name", "username", "email", "password"]
     for field in required_fields:
         if field not in user_data or not user_data[field]:
             raise ValueError(f"{field} is required.")
@@ -192,6 +212,8 @@ def create_user(user_data: dict) -> dict:
 
     try:
         # 중복 확인
+        if users_collection.find_one({"name": user_data["name"]}):
+            raise ValueError(f"이미 존재하는 이름입니다: {user_data['name']}")
         if users_collection.find_one({"username": user_data["username"]}):
             raise ValueError(f"이미 존재하는 username입니다: {user_data['username']}")
         if users_collection.find_one({"email": user_data["email"]}):
@@ -228,8 +250,8 @@ def update_user(user_id: str, update_data: dict) -> dict:
     _validate_credentials()
 
     try:
-        # _id, password, is_admin, username은 수정 불가
-        for blocked in ("_id", "password", "is_admin", "username"):
+        # _id, password, is_admin은 수정 불가
+        for blocked in ("_id", "password", "is_admin"):
             update_data.pop(blocked, None)
 
         # updated_at 자동 설정
@@ -243,6 +265,15 @@ def update_user(user_id: str, update_data: dict) -> dict:
             })
             if existing_user:
                 raise ValueError(f"이미 존재하는 email입니다: {update_data['email']}")
+
+        # 중복 확인 (username 수정 시)
+        if "username" in update_data:
+            existing_user = users_collection.find_one({
+                "username": update_data["username"],
+                "_id": {"$ne": ObjectId(user_id)}
+            })
+            if existing_user:
+                raise ValueError(f"이미 존재하는 username입니다: {update_data['username']}")
 
         result = users_collection.find_one_and_update(
             {"_id": ObjectId(user_id)},

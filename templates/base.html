@@ -49,15 +49,21 @@
             </a>
           </li>
           <li>
-            <a href="/submit" class="nav-link">
-              <i data-feather="activity"></i>
-              <span>기록 등록</span>
-            </a>
-          </li>
-          <li>
             <a href="/leaderboard" class="nav-link">
               <i data-feather="award"></i>
               <span>리더보드</span>
+            </a>
+          </li>
+          <li>
+            <a href="/user-search" class="nav-link">
+              <i data-feather="users"></i>
+              <span>사용자 검색</span>
+            </a>
+          </li>
+          <li>
+            <a href="/submit" class="nav-link">
+              <i data-feather="activity"></i>
+              <span>기록 등록</span>
             </a>
           </li>
           <li>
@@ -218,7 +224,7 @@
                   <!-- Footer: Admin & Logout -->
                   <div style="padding: var(--space-3); border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: var(--space-2);">
                     {% if current_user.is_admin %}
-                      <a href="/admin/records" style="
+                      <a href="{{ url_for('admin.admin_dashboard') }}" style="
                         display: flex;
                         align-items: center;
                         gap: var(--space-3);
@@ -284,15 +290,21 @@
         </a>
       </li>
       <li>
-        <a href="/submit" class="nav-link">
-          <i data-feather="activity"></i>
-          <span>기록 등록</span>
-        </a>
-      </li>
-      <li>
         <a href="/leaderboard" class="nav-link">
           <i data-feather="award"></i>
           <span>리더보드</span>
+        </a>
+      </li>
+      <li>
+        <a href="/user-search" class="nav-link">
+          <i data-feather="users"></i>
+          <span>사용자 검색</span>
+        </a>
+      </li>
+      <li>
+        <a href="/submit" class="nav-link">
+          <i data-feather="activity"></i>
+          <span>기록 등록</span>
         </a>
       </li>
       <li>
@@ -345,7 +357,7 @@
         </div>
 
         {% if current_user.is_admin %}
-          <a href="/admin/records" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; margin-bottom: var(--space-2);">
+          <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; margin-bottom: var(--space-2);">
             <i data-feather="shield"></i>
             관리자 패널
           </a>

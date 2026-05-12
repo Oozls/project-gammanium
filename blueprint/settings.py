@@ -9,7 +9,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from database import upload_file, fetch_file_bytes
-from database.mongodb import update_user, get_user
+from database.mongodb import update_user, get_user, get_user_by_username
 
 settings_bp = Blueprint('settings', __name__)
 
@@ -111,3 +111,63 @@ def get_profile_image(user_id):
     except Exception as e:
         print(f"프로필 이미지 제공 중 오류: {user_id}, {str(e)}")
         return ('이미지를 불러올 수 없습니다', 500)
+
+
+@settings_bp.route('/settings/username', methods=['POST'])
+@login_required
+def update_username():
+    """사용자명 업데이트"""
+    try:
+        username = request.form.get('username', '').strip()
+
+        # 입력 검증
+        if not username:
+            flash('사용자명을 입력해주세요', 'error')
+            return redirect(url_for('settings.settings_page'))
+
+        if len(username) < 3:
+            flash('사용자명은 3자 이상이어야 합니다', 'error')
+            return redirect(url_for('settings.settings_page'))
+
+        # 중복 확인
+        existing_user = get_user_by_username(username)
+        if existing_user and str(existing_user['_id']) != str(current_user.id):
+            flash('이미 사용 중인 사용자명입니다', 'error')
+            return redirect(url_for('settings.settings_page'))
+
+        # 데이터베이스 업데이트 시도
+        try:
+            update_user(str(current_user.id), {'username': username})
+            current_user.username = username
+            flash('사용자명이 변경되었습니다', 'success')
+        except ValueError as e:
+            flash(str(e), 'error')
+
+        return redirect(url_for('settings.settings_page'))
+
+    except Exception as e:
+        flash(f'사용자명 변경 중 오류가 발생했습니다: {str(e)}', 'error')
+        return redirect(url_for('settings.settings_page'))
+
+
+@settings_bp.route('/settings/bio', methods=['POST'])
+@login_required
+def update_bio():
+    """자기 소개 업데이트"""
+    try:
+        bio = request.form.get('bio', '').strip()
+
+        if len(bio) > 500:
+            flash('자기 소개는 500자 이하여야 합니다', 'error')
+            return redirect(url_for('settings.settings_page'))
+
+        update_user(str(current_user.id), {'bio': bio})
+
+        current_user.bio = bio
+
+        flash('자기 소개가 저장되었습니다', 'success')
+        return redirect(url_for('settings.settings_page'))
+
+    except Exception as e:
+        flash(f'자기 소개 저장 중 오류가 발생했습니다: {str(e)}', 'error')
+        return redirect(url_for('settings.settings_page'))

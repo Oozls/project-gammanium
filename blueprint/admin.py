@@ -17,7 +17,9 @@ from database.mongodb import (
     delete_record,
     get_global_stats,
     get_user,
+    get_all_users,
 )
+from database.mongodb.user import update_user as update_user_db
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,104 @@ def admin_required(f):
             return redirect(url_for('main_page'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+@admin_bp.route('/')
+@admin_required
+def admin_dashboard():
+    """관리자 대시보드"""
+    try:
+        stats = get_global_stats()
+        return render_template('admin_dashboard.html', stats=stats)
+    except Exception as e:
+        logger.exception('관리자 대시보드 조회 오류')
+        flash('대시보드 로드 중 오류가 발생했습니다', 'error')
+        return render_template('admin_dashboard.html', stats={'total_records': 0, 'pending': 0, 'approved': 0, 'rejected': 0})
+
+
+@admin_bp.route('/users')
+@admin_required
+def admin_users():
+    """관리자 - 사용자 관리 목록"""
+    try:
+        search_type = request.args.get('search_type', 'username')
+        search_query = request.args.get('search_query', '').strip()
+
+        # 모든 사용자 조회
+        users = get_all_users(skip=0, limit=1000)
+
+        # 검색 필터 적용
+        filtered_users = users
+        if search_query:
+            filtered_users = []
+            for user in users:
+                if search_type == 'username' and search_query.lower() in user.get('username', '').lower():
+                    filtered_users.append(user)
+                elif search_type == 'student_id' and search_query in user.get('student_id', ''):
+                    filtered_users.append(user)
+                elif search_type == 'email' and search_query.lower() in user.get('email', '').lower():
+                    filtered_users.append(user)
+                elif search_type == 'name' and search_query.lower() in user.get('name', '').lower():
+                    filtered_users.append(user)
+
+        return render_template(
+            'admin_users.html',
+            users=filtered_users,
+            search_type=search_type,
+            search_query=search_query,
+        )
+
+    except Exception as e:
+        logger.exception('사용자 목록 조회 오류')
+        flash('사용자 목록 조회 중 오류가 발생했습니다', 'error')
+        return render_template('admin_users.html', users=[], search_type='username', search_query='')
+
+
+@admin_bp.route('/users/<string:user_id>', methods=['GET', 'POST'])
+@admin_required
+def admin_user_detail(user_id):
+    """관리자 - 사용자 정보 수정"""
+    try:
+        user = get_user(user_id)
+
+        if not user:
+            flash('사용자를 찾을 수 없습니다', 'error')
+            return redirect(url_for('admin.admin_users'))
+
+        if request.method == 'POST':
+            # 수정 가능한 필드들
+            update_data = {
+                'name': request.form.get('name', '').strip(),
+                'email': request.form.get('email', '').strip(),
+                'student_id': request.form.get('student_id', '').strip(),
+                'role': request.form.get('role', '').strip(),
+                'bio': request.form.get('bio', '').strip(),
+            }
+
+            # 이메일 검증
+            if update_data['email'] and '@' not in update_data['email']:
+                flash('올바른 이메일 형식이 아닙니다', 'error')
+                return render_template('admin_user_detail.html', user=user)
+
+            # 역할 검증
+            if update_data['role'] and update_data['role'] not in ['student', 'teacher']:
+                flash('올바른 역할을 선택해주세요', 'error')
+                return render_template('admin_user_detail.html', user=user)
+
+            try:
+                updated_user = update_user_db(user_id, update_data)
+                flash('사용자 정보가 수정되었습니다', 'success')
+                return render_template('admin_user_detail.html', user=updated_user)
+            except ValueError as e:
+                flash(str(e), 'error')
+                return render_template('admin_user_detail.html', user=user)
+
+        return render_template('admin_user_detail.html', user=user)
+
+    except Exception as e:
+        logger.exception('사용자 상세 조회 오류')
+        flash('사용자 정보 조회 중 오류가 발생했습니다', 'error')
+        return redirect(url_for('admin.admin_users'))
 
 
 @admin_bp.route('/records')

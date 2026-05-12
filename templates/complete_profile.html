@@ -16,7 +16,7 @@
       <!-- Header -->
       <div style="text-align: center; margin-bottom: var(--space-8);">
         <h2 style="margin-bottom: var(--space-2);">프로필 완성</h2>
-        <p class="text-sm">계정을 완성하기 위해 학번과 역할 정보를 입력해주세요</p>
+        <p class="text-sm">계정을 완성하기 위해 역할 정보를 입력해주세요</p>
       </div>
 
       <!-- Form -->
@@ -33,16 +33,16 @@
         </div>
 
         <!-- Student ID field -->
-        <div class="form-group">
-          <label class="form-label required">학번</label>
+        <div class="form-group" id="student_id_field">
+          <label class="form-label" id="student_id_label">학번</label>
           <input
             type="text"
             name="student_id"
+            id="student_id_input"
             class="form-input"
             placeholder="학번 (예: 30209)"
             pattern="[123]0[1-8](0[1-9]|[1-2][0-9]|3[0-9])"
             maxlength="5"
-            required
           />
           <p class="form-hint">형식: 학년(1-3) + 0 + 반(1-8) + 번호(01-39)</p>
         </div>
@@ -59,5 +59,30 @@
 
   </div>
 </section>
+
+<script>
+  // 역할 선택에 따라 학번 필드 동적 제어
+  const roleSelect = document.querySelector('select[name="role"]');
+  const studentIdField = document.getElementById('student_id_field');
+  const studentIdLabel = document.getElementById('student_id_label');
+  const studentIdInput = document.getElementById('student_id_input');
+
+  function updateStudentIdField() {
+    const role = roleSelect.value;
+    if (role === 'student') {
+      studentIdField.style.display = 'block';
+      studentIdLabel.classList.add('required');
+      studentIdInput.required = true;
+    } else {
+      studentIdField.style.display = 'none';
+      studentIdLabel.classList.remove('required');
+      studentIdInput.required = false;
+      studentIdInput.value = '';
+    }
+  }
+
+  roleSelect.addEventListener('change', updateStudentIdField);
+  updateStudentIdField();
+</script>
 
 {% endblock %}

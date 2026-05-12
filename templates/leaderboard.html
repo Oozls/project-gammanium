@@ -22,23 +22,45 @@
       </p>
     </div>
 
-    <!-- Filter and sort tabs -->
-    <div style="display: flex; justify-content: center; gap: var(--space-4); margin-bottom: var(--space-8); flex-wrap: wrap;">
+    <!-- Filters -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-6); margin-bottom: var(--space-12);">
 
-      <a href="{{ url_for('record.leaderboard', filter='all') }}" class="btn {% if current_filter == 'all' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none;">
-        <i data-feather="zap"></i>
-        전체
-      </a>
+      <!-- Time Filter Row -->
+      <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-3);">
+        <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); font-weight: var(--font-weight-medium); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">기간</p>
+        <div style="display: flex; justify-content: center; gap: var(--space-2);">
+          <a href="{{ url_for('record.leaderboard', filter='all', type=current_type) }}" class="btn {% if current_filter == 'all' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none; font-size: var(--font-size-sm);">
+            <i data-feather="zap"></i>
+            전체
+          </a>
 
-      <a href="{{ url_for('record.leaderboard', filter='week') }}" class="btn {% if current_filter == 'week' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none;">
-        <i data-feather="trending-up"></i>
-        이번 주
-      </a>
+          <a href="{{ url_for('record.leaderboard', filter='week', type=current_type) }}" class="btn {% if current_filter == 'week' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none; font-size: var(--font-size-sm);">
+            <i data-feather="trending-up"></i>
+            이번 주
+          </a>
 
-      <a href="{{ url_for('record.leaderboard', filter='month') }}" class="btn {% if current_filter == 'month' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none;">
-        <i data-feather="calendar"></i>
-        이번 달
-      </a>
+          <a href="{{ url_for('record.leaderboard', filter='month', type=current_type) }}" class="btn {% if current_filter == 'month' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none; font-size: var(--font-size-sm);">
+            <i data-feather="calendar"></i>
+            이번 달
+          </a>
+        </div>
+      </div>
+
+      <!-- Type Filter Row -->
+      <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-3);">
+        <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); font-weight: var(--font-weight-medium); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">보기</p>
+        <div style="display: flex; justify-content: center; gap: var(--space-2);">
+          <a href="{{ url_for('record.leaderboard', filter=current_filter, type='personal') }}" class="btn {% if current_type == 'personal' or current_type is undefined %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none; font-size: var(--font-size-sm);">
+            <i data-feather="user"></i>
+            개인
+          </a>
+
+          <a href="{{ url_for('record.leaderboard', filter=current_filter, type='class') }}" class="btn {% if current_type == 'class' %}btn-primary{% else %}btn-ghost{% endif %}" style="justify-content: center; text-decoration: none; font-size: var(--font-size-sm);">
+            <i data-feather="users"></i>
+            반
+          </a>
+        </div>
+      </div>
 
     </div>
 
@@ -83,6 +105,9 @@
 
     </div>
 
+    <!-- Personal Leaderboard Section -->
+    {% if current_type == 'personal' %}
+
     <!-- Top 3 Podium -->
     <div class="podium-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-bottom: var(--space-12);">
 
@@ -108,9 +133,12 @@
             </div>
             <h3 style="margin-bottom: var(--space-2); display: flex; flex-direction: column; align-items: center;">
               <a href="{{ url_for('record.public_user_records', user_id=leaderboard_all[1].user_id) }}" style="color: inherit; text-decoration: none; display: inline;">
-                {{ leaderboard_all[1].user.username if leaderboard_all[1].user else '알 수 없음' }}
+                <span style="font-weight: var(--font-weight-bold); font-size: var(--font-size-md);">{{ leaderboard_all[1].user.username if leaderboard_all[1].user else '알 수 없음' }}</span>
               </a>
               {% if leaderboard_all[1].user %}
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-top: var(--space-1); font-weight: var(--font-weight-medium);">
+                {{ leaderboard_all[1].user.name if leaderboard_all[1].user.name else '-' }}
+              </span>
               <span style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-1);">
                 {{ leaderboard_all[1].user.student_id if leaderboard_all[1].user.student_id else '-' }}
                 <span style="margin: 0 var(--space-1);">·</span>
@@ -155,9 +183,12 @@
             </div>
             <h3 style="margin-bottom: var(--space-2); display: flex; flex-direction: column; align-items: center;">
               <a href="{{ url_for('record.public_user_records', user_id=leaderboard_all[0].user_id) }}" style="color: inherit; text-decoration: none; display: inline;">
-                {{ leaderboard_all[0].user.username if leaderboard_all[0].user else '알 수 없음' }}
+                <span style="font-weight: var(--font-weight-bold); font-size: var(--font-size-md);">{{ leaderboard_all[0].user.username if leaderboard_all[0].user else '알 수 없음' }}</span>
               </a>
               {% if leaderboard_all[0].user %}
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-top: var(--space-1); font-weight: var(--font-weight-medium);">
+                {{ leaderboard_all[0].user.name if leaderboard_all[0].user.name else '-' }}
+              </span>
               <span style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-1);">
                 {{ leaderboard_all[0].user.student_id if leaderboard_all[0].user.student_id else '-' }}
                 <span style="margin: 0 var(--space-1);">·</span>
@@ -201,9 +232,12 @@
             </div>
             <h3 style="margin-bottom: var(--space-2); display: flex; flex-direction: column; align-items: center;">
               <a href="{{ url_for('record.public_user_records', user_id=leaderboard_all[2].user_id) }}" style="color: inherit; text-decoration: none; display: inline;">
-                {{ leaderboard_all[2].user.username if leaderboard_all[2].user else '알 수 없음' }}
+                <span style="font-weight: var(--font-weight-bold); font-size: var(--font-size-md);">{{ leaderboard_all[2].user.username if leaderboard_all[2].user else '알 수 없음' }}</span>
               </a>
               {% if leaderboard_all[2].user %}
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-top: var(--space-1); font-weight: var(--font-weight-medium);">
+                {{ leaderboard_all[2].user.name if leaderboard_all[2].user.name else '-' }}
+              </span>
               <span style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-1);">
                 {{ leaderboard_all[2].user.student_id if leaderboard_all[2].user.student_id else '-' }}
                 <span style="margin: 0 var(--space-1);">·</span>
@@ -336,10 +370,13 @@
                       </div>
                     {% endif %}
                     <div style="flex: 1;">
-                      <p style="font-weight: var(--font-weight-medium); color: var(--color-text); margin-bottom: var(--space-1);">
+                      <p style="font-weight: var(--font-weight-bold); color: var(--color-text); margin-bottom: var(--space-1);">
                         {{ entry.user.username if entry.user else '알 수 없음' }}
                       </p>
                       {% if entry.user %}
+                      <p style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-bottom: var(--space-1); font-weight: var(--font-weight-medium);">
+                        {{ entry.user.name if entry.user.name else '-' }}
+                      </p>
                       <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0;">
                         {{ entry.user.student_id if entry.user.student_id else '-' }}
                         <span style="margin: 0 var(--space-1);">·</span>
@@ -408,7 +445,7 @@
       <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-top: var(--space-8);">
         <!-- Previous button -->
         {% if current_page > 1 %}
-          <a href="{{ url_for('record.leaderboard', page=current_page-1, filter=current_filter) }}" class="btn btn-ghost btn-sm">
+          <a href="{{ url_for('record.leaderboard', page=current_page-1, filter=current_filter, type=current_type) }}" class="btn btn-ghost btn-sm">
             <i data-feather="chevron-left"></i>
           </a>
         {% else %}
@@ -424,13 +461,13 @@
           {% elif page_num == current_page %}
             <button class="btn btn-primary btn-sm" style="width: 36px; height: 36px; padding: 0; justify-content: center;">{{ page_num }}</button>
           {% else %}
-            <a href="{{ url_for('record.leaderboard', page=page_num, filter=current_filter) }}" class="btn btn-ghost btn-sm" style="width: 36px; height: 36px; padding: 0; justify-content: center;">{{ page_num }}</a>
+            <a href="{{ url_for('record.leaderboard', page=page_num, filter=current_filter, type=current_type) }}" class="btn btn-ghost btn-sm" style="width: 36px; height: 36px; padding: 0; justify-content: center;">{{ page_num }}</a>
           {% endif %}
         {% endfor %}
 
         <!-- Next button -->
         {% if current_page < total_pages %}
-          <a href="{{ url_for('record.leaderboard', page=current_page+1, filter=current_filter) }}" class="btn btn-ghost btn-sm">
+          <a href="{{ url_for('record.leaderboard', page=current_page+1, filter=current_filter, type=current_type) }}" class="btn btn-ghost btn-sm">
             <i data-feather="chevron-right"></i>
           </a>
         {% else %}
@@ -443,9 +480,63 @@
 
     </div>
 
+    {% endif %}
+
+    <!-- Class/Grade leaderboard -->
+    {% if current_type == 'class' %}
+    <div style="margin-top: var(--space-12);">
+      <h3 style="margin-bottom: var(--space-4); font-size: var(--font-size-lg);">반별 순위</h3>
+
+      <div class="card" style="margin-bottom: var(--space-8);">
+        <div style="padding: var(--space-6);">
+          <canvas id="classLeaderboardChart" height="80"></canvas>
+        </div>
+      </div>
+
+      <!-- Class ranking table -->
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+
+          <!-- Table header -->
+          <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+              <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm); width: 60px;">
+                순위
+              </th>
+              <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                반
+              </th>
+              <th style="padding: var(--space-4); text-align: right; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                총 거리
+              </th>
+              <th style="padding: var(--space-4); text-align: right; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                기록 수
+              </th>
+              <th style="padding: var(--space-4); text-align: right; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                평균 거리
+              </th>
+              <th style="padding: var(--space-4); text-align: right; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                참여자
+              </th>
+              <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+                배지
+              </th>
+            </tr>
+          </thead>
+
+          <!-- Table body -->
+          <tbody id="classLeaderboardTableBody">
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
   </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script>
   feather.replace();
 
@@ -470,6 +561,218 @@
       </div>
     `;
   }
+
+  // 반별 리더보드 차트
+  const classLeaderboardData = {{ class_leaderboard | tojson }};
+
+  // 모든 반의 데이터를 배열로 변환 및 거리 기준으로 정렬
+  let allClasses = [];
+  for (let grade = 1; grade <= 3; grade++) {
+    for (let cls = 1; cls <= 8; cls++) {
+      const key = grade + '-' + cls;
+      const data = classLeaderboardData[key] || { total_distance: 0, count: 0, participants: 0 };
+      if (data.total_distance > 0) {
+        allClasses.push({
+          label: grade + '학년 ' + cls + '반',
+          distance: parseFloat(data.total_distance.toFixed(1)),
+          count: data.count || 0,
+          participants: data.participants || 0
+        });
+      }
+    }
+  }
+
+  // 거리 기준으로 내림차순 정렬
+  allClasses.sort((a, b) => b.distance - a.distance);
+
+  // 상위 5개만 선택
+  const topClasses = allClasses.slice(0, 5);
+
+  const labels = topClasses.map(c => c.label);
+  const distances = topClasses.map(c => c.distance);
+
+  // 클래스 순위 테이블 채우기
+  const tableBody = document.getElementById('classLeaderboardTableBody');
+  allClasses.forEach((classData, index) => {
+    const rank = index + 1;
+    const className = classData.label;
+    const totalDistance = classData.distance;
+    const recordCount = classData.count || 0;
+
+    const averageDistance = recordCount > 0 ? (totalDistance / recordCount).toFixed(2) : 0;
+
+    // 순위 배지 색상
+    let rankBgColor = 'var(--color-text-muted)';
+    let rankTextColor = 'white';
+    if (rank === 1) {
+      rankBgColor = 'linear-gradient(135deg, #FFD700 0%, #FFC700 100%)';
+    } else if (rank === 2) {
+      rankBgColor = 'linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%)';
+    } else if (rank === 3) {
+      rankBgColor = 'linear-gradient(135deg, #CD7F32 0%, #B87333 100%)';
+    }
+
+    // 배지 결정
+    let badge = '';
+    let badgeClass = 'badge-neutral';
+    let badgeText = '활약 중';
+    let badgeIcon = 'zap';
+
+    if (rank <= 3) {
+      badgeClass = 'badge-accent';
+      badgeText = '상위 3';
+      badgeIcon = 'star';
+    } else if (rank <= 10) {
+      badgeClass = 'badge-primary';
+      badgeText = '상위 10';
+      badgeIcon = 'trending-up';
+    }
+
+    const row = document.createElement('tr');
+    row.style.cssText = 'border-bottom: 1px solid var(--color-border); transition: background-color var(--transition-fast); cursor: default;';
+    row.innerHTML = `
+      <td style="padding: var(--space-4); text-align: center; width: 80px;">
+        <span style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: var(--radius-full);
+          background: ${rankBgColor};
+          color: ${rankTextColor};
+          font-weight: var(--font-weight-bold);
+          font-size: var(--font-size-md);
+        ">${rank}</span>
+      </td>
+
+      <td style="padding: var(--space-4);">
+        <p style="font-weight: var(--font-weight-bold); color: var(--color-text); margin: 0;">
+          ${className}
+        </p>
+      </td>
+
+      <td style="padding: var(--space-4); text-align: right;">
+        <span style="font-weight: var(--font-weight-semibold); color: var(--color-primary); font-size: var(--font-size-md);">
+          ${totalDistance.toFixed(1)} km
+        </span>
+      </td>
+
+      <td style="padding: var(--space-4); text-align: right;">
+        <span style="color: var(--color-text); font-weight: var(--font-weight-medium);">
+          ${recordCount}회
+        </span>
+      </td>
+
+      <td style="padding: var(--space-4); text-align: right;">
+        <span style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+          ${parseFloat(averageDistance).toFixed(2)} km
+        </span>
+      </td>
+
+      <td style="padding: var(--space-4); text-align: right;">
+        <span style="color: var(--color-text); font-weight: var(--font-weight-medium);">
+          ${classData.participants}명
+        </span>
+      </td>
+
+      <td style="padding: var(--space-4); text-align: center;">
+        <span class="badge ${badgeClass}" style="justify-content: center;">
+          <i data-feather="${badgeIcon}" style="width: 12px; height: 12px;"></i>
+          ${badgeText}
+        </span>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  // Feather 아이콘 업데이트
+  feather.replace();
+
+  const colors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'
+  ];
+
+  const ctx = document.getElementById('classLeaderboardChart').getContext('2d');
+  const classChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '총 달리기 거리 (km)',
+        data: distances,
+        backgroundColor: colors.slice(0, labels.length),
+        borderColor: colors.slice(0, labels.length),
+        borderWidth: 1,
+        borderRadius: 4,
+        barPercentage: 0.5,
+        categoryPercentage: 0.6,
+      }]
+    },
+    options: {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        datalabels: {
+          display: true,
+          anchor: 'end',
+          align: 'top',
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.parsed.y.toFixed(1) + ' km';
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            display: false,
+          }
+        }
+      },
+      layout: {
+        padding: 20
+      }
+    },
+    plugins: [{
+      afterDraw: function(chart) {
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach(function(dataset, i) {
+          const meta = chart.getDatasetMeta(i);
+          meta.data.forEach(function(bar, index) {
+            const value = dataset.data[index];
+            const x = bar.x;
+            const y = bar.y;
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(value.toFixed(1) + ' km', x, y - 5);
+          });
+        });
+      }
+    }]
+  });
+
+  // 창 크기 변경 시 차트 리사이즈
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      if (classChart) {
+        classChart.resize();
+      }
+    }, 100);
+  });
 </script>
 
 {% endblock %}

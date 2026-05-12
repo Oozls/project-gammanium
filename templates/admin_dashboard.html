@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}관리자 대시보드 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     ADMIN DASHBOARD PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container">
+
+    <!-- Header -->
+    <div style="margin-bottom: var(--space-12);">
+      <h1 style="margin-bottom: var(--space-2);">관리자 대시보드</h1>
+      <p class="text-md" style="color: var(--color-text-secondary);">
+        운영 현황을 한눈에 확인합니다
+      </p>
+    </div>
+
+    <!-- Stats grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-6); margin-bottom: var(--space-12);">
+
+      <!-- Total records -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4);">
+          <div>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0 0 var(--space-2) 0; font-weight: var(--font-weight-medium);">전체 기록</p>
+            <p style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-primary); margin: 0;">
+              {{ stats.total_records }}
+            </p>
+          </div>
+          <div style="background: rgba(212, 119, 66, 0.1); padding: var(--space-3); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+            <i data-feather="activity" style="width: 24px; height: 24px; color: var(--color-primary);"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending records -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4);">
+          <div>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0 0 var(--space-2) 0; font-weight: var(--font-weight-medium);">검토 대기</p>
+            <p style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-warning); margin: 0;">
+              {{ stats.pending }}
+            </p>
+          </div>
+          <div style="background: rgba(255, 193, 7, 0.1); padding: var(--space-3); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+            <i data-feather="clock" style="width: 24px; height: 24px; color: var(--color-warning);"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approved records -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4);">
+          <div>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0 0 var(--space-2) 0; font-weight: var(--font-weight-medium);">승인됨</p>
+            <p style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-success); margin: 0;">
+              {{ stats.approved }}
+            </p>
+          </div>
+          <div style="background: rgba(76, 175, 80, 0.1); padding: var(--space-3); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+            <i data-feather="check-circle" style="width: 24px; height: 24px; color: var(--color-success);"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rejected records -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4);">
+          <div>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0 0 var(--space-2) 0; font-weight: var(--font-weight-medium);">거절됨</p>
+            <p style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-error); margin: 0;">
+              {{ stats.rejected }}
+            </p>
+          </div>
+          <div style="background: rgba(244, 67, 54, 0.1); padding: var(--space-3); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+            <i data-feather="x-circle" style="width: 24px; height: 24px; color: var(--color-error);"></i>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Admin features -->
+    <div style="margin-bottom: var(--space-8);">
+      <h2 style="margin-bottom: var(--space-6); font-size: var(--font-size-lg);">기능</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-6);">
+
+        <!-- Records management -->
+        <div class="card" style="display: flex; flex-direction: column; gap: var(--space-4);">
+          <div>
+            <div style="background: rgba(212, 119, 66, 0.1); padding: var(--space-4); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+              <i data-feather="clipboard" style="width: 32px; height: 32px; color: var(--color-primary);"></i>
+            </div>
+            <h3 style="margin: 0 0 var(--space-2) 0; font-size: var(--font-size-md); font-weight: var(--font-weight-semibold);">기록 관리</h3>
+            <p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.5;">
+              사용자가 제출한 기록을 검토하고 승인/거절합니다
+            </p>
+          </div>
+          <a href="{{ url_for('admin.admin_records') }}" class="btn btn-primary" style="margin-top: auto; justify-content: center; width: 100%;">
+            <i data-feather="arrow-right"></i>
+            기록 검토하기
+          </a>
+        </div>
+
+        <!-- User management -->
+        <div class="card" style="display: flex; flex-direction: column; gap: var(--space-4);">
+          <div>
+            <div style="background: rgba(156, 125, 233, 0.1); padding: var(--space-4); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+              <i data-feather="users" style="width: 32px; height: 32px; color: var(--color-accent);"></i>
+            </div>
+            <h3 style="margin: 0 0 var(--space-2) 0; font-size: var(--font-size-md); font-weight: var(--font-weight-semibold);">사용자 관리</h3>
+            <p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.5;">
+              사용자 정보를 조회하고 수정합니다
+            </p>
+          </div>
+          <a href="{{ url_for('admin.admin_users') }}" class="btn btn-primary" style="margin-top: auto; justify-content: center; width: 100%; background-color: var(--color-accent);">
+            <i data-feather="arrow-right"></i>
+            사용자 관리하기
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  feather.replace();
+</script>
+
+{% endblock %}

@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}사용자 관리 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     ADMIN USERS PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container">
+
+    <!-- Back button -->
+    <a href="{{ url_for('admin.admin_dashboard') }}" style="display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-primary); text-decoration: none; margin-bottom: var(--space-6); font-weight: var(--font-weight-medium);">
+      <i data-feather="chevron-left" style="width: 18px; height: 18px;"></i>
+      대시보드로
+    </a>
+
+    <!-- Header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-8); margin-bottom: var(--space-12); flex-wrap: wrap;">
+      <div>
+        <h1 style="margin-bottom: var(--space-2);">사용자 관리</h1>
+        <p class="text-md" style="color: var(--color-text-secondary);">
+          전체 {{ users|length }}명의 사용자
+        </p>
+      </div>
+    </div>
+
+    <!-- Search section -->
+    <div class="card" style="margin-bottom: var(--space-8);">
+      <h3 style="margin-bottom: var(--space-6); font-size: var(--font-size-lg);">검색</h3>
+
+      <form method="GET" style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+          <label style="display: block; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); margin-bottom: var(--space-2); color: var(--color-text);">
+            검색 유형
+          </label>
+          <div class="form-select-wrapper">
+            <select name="search_type" class="form-select">
+              <option value="username" {% if search_type == 'username' %}selected{% endif %}>사용자명</option>
+              <option value="student_id" {% if search_type == 'student_id' %}selected{% endif %}>학번</option>
+              <option value="email" {% if search_type == 'email' %}selected{% endif %}>이메일</option>
+              <option value="name" {% if search_type == 'name' %}selected{% endif %}>이름</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="flex: 1.5; min-width: 200px;">
+          <label style="display: block; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); margin-bottom: var(--space-2); color: var(--color-text);">
+            검색어
+          </label>
+          <input type="text" name="search_query" class="form-input" placeholder="검색어를 입력하세요" value="{{ search_query }}" style="width: 100%;">
+        </div>
+
+        <div style="display: flex; align-items: flex-end; gap: var(--space-2);">
+          <button type="submit" class="btn btn-primary">
+            <i data-feather="search"></i>
+            검색
+          </button>
+          <a href="{{ url_for('admin.admin_users') }}" class="btn btn-ghost">
+            <i data-feather="x"></i>
+            초기화
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Users list -->
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+
+        <!-- Table header -->
+        <thead>
+          <tr style="border-bottom: 2px solid var(--color-border);">
+            <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+              사용자명
+            </th>
+            <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+              학번
+            </th>
+            <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+              이메일
+            </th>
+            <th style="padding: var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+              역할
+            </th>
+            <th style="padding: var(--space-4); text-align: center; font-weight: var(--font-weight-semibold); color: var(--color-text); font-size: var(--font-size-sm);">
+              상태
+            </th>
+          </tr>
+        </thead>
+
+        <!-- Table body -->
+        <tbody>
+          {% if users %}
+            {% for user in users %}
+              <tr
+                style="
+                  border-bottom: 1px solid var(--color-border);
+                  transition: background-color var(--transition-fast);
+                  cursor: pointer;
+                "
+                onclick="window.location.href='{{ url_for('admin.admin_user_detail', user_id=user._id) }}';"
+                onmouseenter="this.style.backgroundColor='var(--color-surface-warm)';"
+                onmouseleave="this.style.backgroundColor='transparent';"
+              >
+                <td style="padding: var(--space-4); color: var(--color-text); font-size: var(--font-size-sm);">
+                  <div style="display: flex; align-items: center; gap: var(--space-3);">
+                    {% if user.profile_image %}
+                      <img src="{{ url_for('settings.get_profile_image', user_id=user._id) }}"
+                           alt="{{ user.username }}"
+                           style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border); flex-shrink: 0;"
+                           onerror="handleAdminUserImageError(this, {{ user.username | tojson }})">
+                    {% else %}
+                      <div style="
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: var(--font-size-xs);
+                        font-weight: var(--font-weight-bold);
+                        flex-shrink: 0;
+                      ">
+                        {{ user.username[0] | upper }}
+                      </div>
+                    {% endif %}
+                    <div style="flex: 1;">
+                      <div style="font-weight: var(--font-weight-bold); margin-bottom: var(--space-1);">{{ user.username }}</div>
+                      <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); font-weight: var(--font-weight-medium);">{{ user.name if user.name else '-' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding: var(--space-4); color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                  {{ user.student_id if user.student_id else '-' }}
+                </td>
+                <td style="padding: var(--space-4); color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                  {{ user.email }}
+                </td>
+                <td style="padding: var(--space-4); font-size: var(--font-size-sm);">
+                  <span style="
+                    display: inline-block;
+                    padding: var(--space-1) var(--space-3);
+                    border-radius: var(--radius-sm);
+                    font-weight: var(--font-weight-medium);
+                    background-color: {% if user.role == 'student' %}rgba(212, 119, 66, 0.1){% else %}rgba(156, 125, 233, 0.1){% endif %};
+                    color: {% if user.role == 'student' %}var(--color-primary){% else %}var(--color-accent){% endif %};
+                  ">
+                    {{ '학생' if user.role == 'student' else '교사' if user.role else '-' }}
+                  </span>
+                </td>
+                <td style="padding: var(--space-4); text-align: center; font-size: var(--font-size-sm);">
+                  {% if user.is_admin %}
+                    <span style="
+                      display: inline-block;
+                      padding: var(--space-1) var(--space-3);
+                      border-radius: var(--radius-sm);
+                      font-weight: var(--font-weight-medium);
+                      background-color: rgba(76, 175, 80, 0.1);
+                      color: var(--color-success);
+                    ">
+                      관리자
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" style="padding: var(--space-8); text-align: center; color: var(--color-text-muted);">
+                검색 결과가 없습니다
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  feather.replace();
+
+  function handleAdminUserImageError(imgElement, username) {
+    const parent = imgElement.parentElement;
+    const firstLetter = username.charAt(0).toUpperCase();
+
+    parent.innerHTML = `
+      <div style="
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: var(--font-weight-bold);
+        flex-shrink: 0;
+      ">
+        ${firstLetter}
+      </div>
+    `;
+  }
+</script>
+
+{% endblock %}

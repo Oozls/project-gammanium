@@ -20,7 +20,9 @@ from database.mongodb import (
     update_record,
     delete_record,
     get_leaderboard,
+    get_class_leaderboard,
     get_user,
+    get_all_users,
 )
 
 logger = logging.getLogger(__name__)
@@ -150,6 +152,7 @@ def leaderboard():
         # 페이지 번호 및 필터 설정
         page = request.args.get('page', 1, type=int)
         current_filter = request.args.get('filter', 'all')
+        current_type = request.args.get('type', 'personal')
         items_per_page = 10
 
         # 날짜 범위 계산
@@ -195,6 +198,9 @@ def leaderboard():
         from database.mongodb import get_global_stats
         global_stats = get_global_stats()
 
+        # 반별 리더보드 조회
+        class_leaderboard = get_class_leaderboard(start_date=start_date)
+
         # 페이지 번호 리스트 생성 (최대 5개 표시, 현재 페이지 기준)
         page_numbers = []
         start_page = max(1, page - 2)
@@ -222,6 +228,8 @@ def leaderboard():
             total_pages=total_pages,
             page_numbers=page_numbers,
             current_filter=current_filter,
+            current_type=current_type,
+            class_leaderboard=class_leaderboard,
         )
 
     except Exception as e:
@@ -526,3 +534,55 @@ def public_record_detail(user_id, record_id):
         print(f"공개 기록 상세 조회 중 오류: {str(e)}")
         flash(f'기록 조회 중 오류가 발생했습니다: {str(e)}', 'error')
         return redirect(url_for('record.leaderboard'))
+
+
+@record_bp.route('/user-search')
+def user_search():
+    """사용자 검색 페이지"""
+    try:
+        search_type = request.args.get('search_type', 'username')
+        search_query = request.args.get('search_query', '').strip()
+
+        # 모든 사용자 조회
+        users = get_all_users(skip=0, limit=1000)
+
+        # 검색 필터 적용
+        filtered_users = users
+        if search_query:
+            filtered_users = []
+            for user in users:
+                if search_type == 'username' and search_query.lower() in user.get('username', '').lower():
+                    filtered_users.append(user)
+                elif search_type == 'student_id' and search_query in user.get('student_id', ''):
+                    filtered_users.append(user)
+                elif search_type == 'email' and search_query.lower() in user.get('email', '').lower():
+                    filtered_users.append(user)
+                elif search_type == 'name' and search_query.lower() in user.get('name', '').lower():
+                    filtered_users.append(user)
+
+        # 각 사용자의 통계 추가
+        for user in filtered_users:
+            try:
+                stats = get_user_record_stats(str(user['_id']))
+                if stats:
+                    user['total_distance'] = stats.get('total_distance', 0)
+                    user['record_count'] = stats.get('approved', 0)
+                else:
+                    user['total_distance'] = 0
+                    user['record_count'] = 0
+            except Exception as e:
+                logger.exception(f'사용자 {user.get("username")} 통계 조회 오류')
+                user['total_distance'] = 0
+                user['record_count'] = 0
+
+        return render_template(
+            'user_search.html',
+            users=filtered_users,
+            search_type=search_type,
+            search_query=search_query,
+        )
+
+    except Exception as e:
+        logger.exception('사용자 검색 오류')
+        flash('사용자 검색 중 오류가 발생했습니다', 'error')
+        return render_template('user_search.html', users=[], search_type='username', search_query='')
