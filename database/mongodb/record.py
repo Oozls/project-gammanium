@@ -369,6 +369,51 @@ def get_user_record_stats(user_id: str) -> dict:
         }
 
 
+def get_bulk_user_record_stats(user_ids: list) -> dict:
+    """
+    여러 사용자의 기록 통계를 한 번의 쿼리로 조회합니다 (N+1 방지).
+
+    Args:
+        user_ids: 사용자 ObjectId 문자열 리스트
+
+    Returns:
+        {user_id_str: {total, pending, approved, rejected, total_distance}}
+    """
+    _validate_credentials()
+
+    default = lambda: {"total": 0, "pending": 0, "approved": 0, "rejected": 0, "total_distance": 0}
+    result = {uid: default() for uid in user_ids}
+
+    try:
+        obj_ids = [ObjectId(uid) for uid in user_ids]
+
+        pipeline = [
+            {"$match": {"user_id": {"$in": obj_ids}}},
+            {"$group": {
+                "_id": {"user_id": "$user_id", "status": "$status"},
+                "count": {"$sum": 1},
+                "distance": {"$sum": "$distance"},
+            }},
+        ]
+
+        for row in records_collection.aggregate(pipeline):
+            uid = str(row["_id"]["user_id"])
+            status = row["_id"]["status"]
+            if uid not in result:
+                continue
+            result[uid]["total"] += row["count"]
+            if status in ("pending", "approved", "rejected"):
+                result[uid][status] = row["count"]
+            if status == "approved":
+                result[uid]["total_distance"] = row["distance"]
+
+        return result
+
+    except Exception as e:
+        print(f"기록 통계 일괄 조회 중 오류: {e}")
+        return result
+
+
 def get_global_stats() -> dict:
     """
     전체 시스템 통계를 조회합니다 (관리자용).

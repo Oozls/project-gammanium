@@ -17,6 +17,7 @@ from database.mongodb import (
     get_record,
     get_user_records,
     get_user_record_stats,
+    get_bulk_user_record_stats,
     update_record,
     delete_record,
     get_leaderboard,
@@ -560,20 +561,12 @@ def user_search():
                 elif search_type == 'name' and search_query.lower() in user.get('name', '').lower():
                     filtered_users.append(user)
 
-        # 각 사용자의 통계 추가
+        # 각 사용자의 통계 추가 (일괄 조회로 N+1 방지)
+        stats_by_user = get_bulk_user_record_stats([str(user['_id']) for user in filtered_users])
         for user in filtered_users:
-            try:
-                stats = get_user_record_stats(str(user['_id']))
-                if stats:
-                    user['total_distance'] = stats.get('total_distance', 0)
-                    user['record_count'] = stats.get('approved', 0)
-                else:
-                    user['total_distance'] = 0
-                    user['record_count'] = 0
-            except Exception as e:
-                logger.exception(f'사용자 {user.get("username")} 통계 조회 오류')
-                user['total_distance'] = 0
-                user['record_count'] = 0
+            stats = stats_by_user.get(str(user['_id']), {})
+            user['total_distance'] = stats.get('total_distance', 0)
+            user['record_count'] = stats.get('approved', 0)
 
         return render_template(
             'user_search.html',
