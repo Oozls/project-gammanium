@@ -347,13 +347,14 @@ def delete_user(user_id: str) -> bool:
 # 유틸리티 함수들
 # ============================================================================
 
-def get_all_users(skip: int = 0, limit: int = 10) -> list:
+def get_all_users(skip: int = 0, limit: int = 10, query: dict = None) -> list:
     """
-    모든 사용자를 조회합니다 (페이지네이션).
+    사용자를 조회합니다 (필터 + 페이지네이션).
 
     Args:
         skip: 건너뛸 문서 수
         limit: 조회할 최대 문서 수
+        query: MongoDB 필터 (None이면 전체)
 
     Returns:
         사용자 정보 리스트
@@ -361,7 +362,7 @@ def get_all_users(skip: int = 0, limit: int = 10) -> list:
     _validate_credentials()
 
     try:
-        users = list(users_collection.find().skip(skip).limit(limit))
+        users = list(users_collection.find(query or {}).skip(skip).limit(limit))
         return users
 
     except Exception as e:
@@ -369,9 +370,12 @@ def get_all_users(skip: int = 0, limit: int = 10) -> list:
         return []
 
 
-def get_user_count() -> int:
+def get_user_count(query: dict = None) -> int:
     """
-    전체 사용자 수를 조회합니다.
+    사용자 수를 조회합니다.
+
+    Args:
+        query: MongoDB 필터 (None이면 전체)
 
     Returns:
         사용자 수
@@ -379,11 +383,33 @@ def get_user_count() -> int:
     _validate_credentials()
 
     try:
-        return users_collection.count_documents({})
+        return users_collection.count_documents(query or {})
 
     except Exception as e:
         print(f"사용자 수 조회 중 오류: {e}")
         return 0
+
+
+def get_users_by_ids(user_ids: list) -> dict:
+    """
+    여러 사용자를 한 번의 쿼리로 조회합니다 (N+1 방지).
+
+    Args:
+        user_ids: 사용자 ObjectId 문자열 리스트
+
+    Returns:
+        {user_id_str: user_dict}
+    """
+    _validate_credentials()
+
+    try:
+        obj_ids = [ObjectId(uid) for uid in user_ids]
+        users = users_collection.find({"_id": {"$in": obj_ids}})
+        return {str(user["_id"]): user for user in users}
+
+    except Exception as e:
+        print(f"사용자 일괄 조회 중 오류: {e}")
+        return {}
 
 
 def get_admin_count() -> int:

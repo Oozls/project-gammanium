@@ -24,11 +24,15 @@ from database.mongodb import (
     get_class_leaderboard,
     get_user,
     get_all_users,
+    get_user_count,
 )
+from .pagination import build_page_numbers, build_user_search_query
 
 logger = logging.getLogger(__name__)
 
 record_bp = Blueprint('record', __name__)
+
+USERS_PER_PAGE = 20
 
 
 @record_bp.route('/submit', methods=['GET', 'POST'])
@@ -543,39 +547,37 @@ def user_search():
     try:
         search_type = request.args.get('search_type', 'username')
         search_query = request.args.get('search_query', '').strip()
+        page = request.args.get('page', 1, type=int)
 
-        # 모든 사용자 조회
-        users = get_all_users(skip=0, limit=1000)
+        query = build_user_search_query(search_type, search_query)
+        total_count = get_user_count(query)
+        total_pages = max(1, (total_count + USERS_PER_PAGE - 1) // USERS_PER_PAGE)
+        page = max(1, min(page, total_pages))
 
-        # 검색 필터 적용
-        filtered_users = users
-        if search_query:
-            filtered_users = []
-            for user in users:
-                if search_type == 'username' and search_query.lower() in user.get('username', '').lower():
-                    filtered_users.append(user)
-                elif search_type == 'student_id' and search_query in user.get('student_id', ''):
-                    filtered_users.append(user)
-                elif search_type == 'email' and search_query.lower() in user.get('email', '').lower():
-                    filtered_users.append(user)
-                elif search_type == 'name' and search_query.lower() in user.get('name', '').lower():
-                    filtered_users.append(user)
+        users = get_all_users(skip=(page - 1) * USERS_PER_PAGE, limit=USERS_PER_PAGE, query=query)
 
         # 각 사용자의 통계 추가 (일괄 조회로 N+1 방지)
-        stats_by_user = get_bulk_user_record_stats([str(user['_id']) for user in filtered_users])
-        for user in filtered_users:
+        stats_by_user = get_bulk_user_record_stats([str(user['_id']) for user in users])
+        for user in users:
             stats = stats_by_user.get(str(user['_id']), {})
             user['total_distance'] = stats.get('total_distance', 0)
             user['record_count'] = stats.get('approved', 0)
 
         return render_template(
             'user_search.html',
-            users=filtered_users,
+            users=users,
             search_type=search_type,
             search_query=search_query,
+            current_page=page,
+            total_pages=total_pages,
+            page_numbers=build_page_numbers(page, total_pages),
+            total_count=total_count,
         )
 
     except Exception as e:
         logger.exception('사용자 검색 오류')
         flash('사용자 검색 중 오류가 발생했습니다', 'error')
-        return render_template('user_search.html', users=[], search_type='username', search_query='')
+        return render_template(
+            'user_search.html', users=[], search_type='username', search_query='',
+            current_page=1, total_pages=1, page_numbers=[1], total_count=0,
+        )

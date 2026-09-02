@@ -12,6 +12,7 @@ from .user import (
     get_all_users,
     get_user_count,
     get_admin_count,
+    get_users_by_ids,
 )
 
 # MongoDB 기록 모듈 exports
@@ -45,6 +46,7 @@ __all__ = [
     "get_all_users",
     "get_user_count",
     "get_admin_count",
+    "get_users_by_ids",
     # Record 함수
     "get_record",
     "get_user_records",

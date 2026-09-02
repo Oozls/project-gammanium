@@ -13,17 +13,24 @@ from database import fetch_file_bytes, delete_folder
 from database.mongodb import (
     get_all_records,
     get_record,
+    get_record_count,
     update_record_status,
     delete_record,
     get_global_stats,
     get_user,
     get_all_users,
+    get_user_count,
+    get_users_by_ids,
 )
 from database.mongodb.user import update_user as update_user_db
+from .pagination import build_page_numbers, build_user_search_query
 
 logger = logging.getLogger(__name__)
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+USERS_PER_PAGE = 20
+RECORDS_PER_PAGE = 20
 
 
 def admin_required(f):
@@ -60,35 +67,33 @@ def admin_users():
     try:
         search_type = request.args.get('search_type', 'username')
         search_query = request.args.get('search_query', '').strip()
+        page = request.args.get('page', 1, type=int)
 
-        # 모든 사용자 조회
-        users = get_all_users(skip=0, limit=1000)
+        query = build_user_search_query(search_type, search_query)
+        total_count = get_user_count(query)
+        total_pages = max(1, (total_count + USERS_PER_PAGE - 1) // USERS_PER_PAGE)
+        page = max(1, min(page, total_pages))
 
-        # 검색 필터 적용
-        filtered_users = users
-        if search_query:
-            filtered_users = []
-            for user in users:
-                if search_type == 'username' and search_query.lower() in user.get('username', '').lower():
-                    filtered_users.append(user)
-                elif search_type == 'student_id' and search_query in user.get('student_id', ''):
-                    filtered_users.append(user)
-                elif search_type == 'email' and search_query.lower() in user.get('email', '').lower():
-                    filtered_users.append(user)
-                elif search_type == 'name' and search_query.lower() in user.get('name', '').lower():
-                    filtered_users.append(user)
+        users = get_all_users(skip=(page - 1) * USERS_PER_PAGE, limit=USERS_PER_PAGE, query=query)
 
         return render_template(
             'admin_users.html',
-            users=filtered_users,
+            users=users,
             search_type=search_type,
             search_query=search_query,
+            current_page=page,
+            total_pages=total_pages,
+            page_numbers=build_page_numbers(page, total_pages),
+            total_count=total_count,
         )
 
     except Exception as e:
         logger.exception('사용자 목록 조회 오류')
         flash('사용자 목록 조회 중 오류가 발생했습니다', 'error')
-        return render_template('admin_users.html', users=[], search_type='username', search_query='')
+        return render_template(
+            'admin_users.html', users=[], search_type='username', search_query='',
+            current_page=1, total_pages=1, page_numbers=[1], total_count=0,
+        )
 
 
 @admin_bp.route('/users/<string:user_id>', methods=['GET', 'POST'])
@@ -143,14 +148,25 @@ def admin_user_detail(user_id):
 def admin_records():
     """관리자 - 등록 기록 검토 목록"""
     status_filter = request.args.get('status', '')
+    page = request.args.get('page', 1, type=int)
 
     try:
-        records = get_all_records(status=status_filter if status_filter else None, limit=100)
         stats = get_global_stats()
 
-        # 각 기록에 사용자 정보 추가
+        total_count = get_record_count(status=status_filter if status_filter else None)
+        total_pages = max(1, (total_count + RECORDS_PER_PAGE - 1) // RECORDS_PER_PAGE)
+        page = max(1, min(page, total_pages))
+
+        records = get_all_records(
+            status=status_filter if status_filter else None,
+            skip=(page - 1) * RECORDS_PER_PAGE,
+            limit=RECORDS_PER_PAGE,
+        )
+
+        # 각 기록에 사용자 정보 추가 (일괄 조회로 N+1 방지)
+        users_by_id = get_users_by_ids([str(record['user_id']) for record in records])
         for record in records:
-            user = get_user(str(record['user_id']))
+            user = users_by_id.get(str(record['user_id']))
             record['user_info'] = user if user else {'username': '알 수 없음', 'email': ''}
 
         return render_template(
@@ -158,6 +174,10 @@ def admin_records():
             records=records,
             stats=stats,
             status_filter=status_filter,
+            current_page=page,
+            total_pages=total_pages,
+            page_numbers=build_page_numbers(page, total_pages),
+            total_count=total_count,
         )
 
     except Exception as e:
@@ -168,6 +188,10 @@ def admin_records():
             records=[],
             stats={'total_records': 0, 'pending': 0, 'approved': 0, 'rejected': 0},
             status_filter=status_filter,
+            current_page=1,
+            total_pages=1,
+            page_numbers=[1],
+            total_count=0,
         )
 
 

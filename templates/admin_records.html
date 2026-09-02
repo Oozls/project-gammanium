@@ -203,6 +203,41 @@
         </table>
       </div>
 
+      <!-- Pagination -->
+      {% if total_pages > 1 %}
+      <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-top: var(--space-8);">
+        {% if current_page > 1 %}
+          <a href="{{ url_for('admin.admin_records', page=current_page-1, status=status_filter) }}" class="btn btn-ghost btn-sm">
+            <i data-feather="chevron-left"></i>
+          </a>
+        {% else %}
+          <button class="btn btn-ghost btn-sm" disabled style="opacity: 0.5; cursor: not-allowed;">
+            <i data-feather="chevron-left"></i>
+          </button>
+        {% endif %}
+
+        {% for page_num in page_numbers %}
+          {% if page_num == '...' %}
+            <span style="color: var(--color-text-muted); padding: 0 var(--space-2);">...</span>
+          {% elif page_num == current_page %}
+            <button class="btn btn-primary btn-sm" style="width: 36px; height: 36px; padding: 0; justify-content: center;">{{ page_num }}</button>
+          {% else %}
+            <a href="{{ url_for('admin.admin_records', page=page_num, status=status_filter) }}" class="btn btn-ghost btn-sm" style="width: 36px; height: 36px; padding: 0; justify-content: center;">{{ page_num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if current_page < total_pages %}
+          <a href="{{ url_for('admin.admin_records', page=current_page+1, status=status_filter) }}" class="btn btn-ghost btn-sm">
+            <i data-feather="chevron-right"></i>
+          </a>
+        {% else %}
+          <button class="btn btn-ghost btn-sm" disabled style="opacity: 0.5; cursor: not-allowed;">
+            <i data-feather="chevron-right"></i>
+          </button>
+        {% endif %}
+      </div>
+      {% endif %}
+
     </div>
 
   </div>
@@ -219,6 +254,7 @@
     } else {
       url.searchParams.delete('status');
     }
+    url.searchParams.delete('page');
     window.location.href = url.toString();
   });
 </script>
