@@ -22,7 +22,7 @@
     <div class="card" style="max-width: 640px; margin-left: auto; margin-right: auto;">
 
       <!-- Form -->
-      <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: var(--space-6);">
+      <form id="submit-form" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: var(--space-6);">
 
         <!-- Section 1: Basic Info -->
         <div>
@@ -89,11 +89,12 @@
               onmouseover="this.style.borderColor='var(--color-primary)'; this.style.backgroundColor='var(--color-surface-warm)';"
               onmouseout="this.style.borderColor='var(--color-border)'; this.style.backgroundColor='';"
             >
-              <i data-feather="upload" style="width: 32px; height: 32px; color: var(--color-text-secondary);"></i>
+              <img id="upload-preview" alt="증거 이미지 미리보기" style="display: none; max-width: 100%; max-height: 240px; border-radius: var(--radius-md); object-fit: contain;" />
+              <i id="upload-icon" data-feather="upload" style="width: 32px; height: 32px; color: var(--color-text-secondary);"></i>
               <span id="upload-text" style="color: var(--color-text-secondary); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);">
                 클릭하여 이미지 선택
               </span>
-              <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
+              <span id="upload-hint" style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
                 PNG, JPG, JPEG 형식 지원
               </span>
             </label>
@@ -170,19 +171,45 @@
 </div>
 
 <script>
+  let previewUrl = null;
+
   function handleFileSelect(input) {
     const textEl = document.getElementById('upload-text');
+    const hintEl = document.getElementById('upload-hint');
+    const iconEl = document.getElementById('upload-icon');
+    const previewEl = document.getElementById('upload-preview');
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+
     if (input.files && input.files[0]) {
       const file = input.files[0];
       textEl.textContent = file.name;
       textEl.style.color = 'var(--color-text)';
       textEl.style.fontWeight = 'var(--font-weight-semibold)';
+      hintEl.textContent = '클릭하여 다른 이미지로 변경';
+
+      previewUrl = URL.createObjectURL(file);
+      previewEl.src = previewUrl;
+      previewEl.style.display = 'block';
+      iconEl.style.display = 'none';
     } else {
       textEl.textContent = '클릭하여 이미지 선택';
       textEl.style.color = 'var(--color-text-secondary)';
       textEl.style.fontWeight = 'var(--font-weight-medium)';
+      hintEl.textContent = 'PNG, JPG, JPEG 형식 지원';
+
+      previewEl.style.display = 'none';
+      previewEl.src = '';
+      iconEl.style.display = 'block';
     }
   }
+
+  document.getElementById('submit-form').addEventListener('reset', function() {
+    setTimeout(() => handleFileSelect(document.getElementById('evidence_image')), 0);
+  });
 
   feather.replace();
 </script>
