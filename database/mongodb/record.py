@@ -429,9 +429,12 @@ def get_global_stats() -> dict:
         approved = records_collection.count_documents({"status": "approved"})
         rejected = records_collection.count_documents({"status": "rejected"})
 
-        # 승인된 기록의 총 거리
-        approved_records = list(records_collection.find({"status": "approved"}))
-        total_distance = sum(r.get("distance", 0) for r in approved_records)
+        # 승인된 기록의 총 거리 (문서 전체를 가져오지 않고 DB에서 합산)
+        distance_agg = list(records_collection.aggregate([
+            {"$match": {"status": "approved"}},
+            {"$group": {"_id": None, "total_distance": {"$sum": "$distance"}}},
+        ]))
+        total_distance = distance_agg[0]["total_distance"] if distance_agg else 0
 
         return {
             "total_records": total,
@@ -528,7 +531,7 @@ def get_class_leaderboard(start_date=None, end_date=None) -> dict:
     _validate_credentials()
 
     try:
-        from database.mongodb.user import get_user
+        from database.mongodb.user import get_users_by_ids
 
         # 기본 match 조건: 승인된 기록만
         match_stage = {"status": "approved"}
@@ -545,6 +548,9 @@ def get_class_leaderboard(start_date=None, end_date=None) -> dict:
         # 승인된 기록 조회
         records = list(records_collection.find(match_stage))
 
+        # 기록에 등장하는 사용자를 한 번에 조회 (N+1 방지)
+        users_by_id = get_users_by_ids(list({str(r['user_id']) for r in records}))
+
         # 반별 통계 계산
         class_stats = {}
         for grade in range(1, 4):
@@ -555,7 +561,7 @@ def get_class_leaderboard(start_date=None, end_date=None) -> dict:
         # 각 기록에서 사용자의 학번을 조회하고 반별로 집계
         for record in records:
             try:
-                user = get_user(str(record['user_id']))
+                user = users_by_id.get(str(record['user_id']))
                 if user and user.get('student_id'):
                     student_id = user['student_id']
                     if len(student_id) >= 3:

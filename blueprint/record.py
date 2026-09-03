@@ -25,6 +25,7 @@ from database.mongodb import (
     get_user,
     get_all_users,
     get_user_count,
+    get_users_by_ids,
 )
 from .pagination import build_page_numbers, build_user_search_query
 
@@ -170,34 +171,39 @@ def leaderboard():
             start_date = now - timedelta(days=30)
         # 'all'일 때는 start_date = None
 
-        # 승인된 기록 기준 리더보드 조회
+        # 승인된 기록 기준 리더보드 조회 (사용자별 집계, 단일 쿼리)
         leaderboard_data = get_leaderboard(start_date=start_date)
 
-        # 각 사용자 정보 추가
-        leaderboard_with_users = []
-        for idx, entry in enumerate(leaderboard_data, 1):
-            user = get_user(str(entry['_id']))
-            leaderboard_with_users.append({
-                'rank': idx,
-                'user_id': entry['_id'],
-                'user': user,
-                'total_distance': entry['total_distance'],
-                'count': entry['count'],
-                'average_distance': entry['average_distance'],
-            })
-
         # 전체 페이지 수 계산
-        total_count = len(leaderboard_with_users)
-        total_pages = (total_count + items_per_page - 1) // items_per_page
+        total_count = len(leaderboard_data)
+        total_pages = max(1, (total_count + items_per_page - 1) // items_per_page)
 
         # 유효한 페이지 범위 확인
         if page < 1 or page > total_pages:
             page = 1
 
-        # 현재 페이지의 데이터
+        # 현재 페이지 + 포디움(상위 3명)에 필요한 항목만 추림
         start_idx = (page - 1) * items_per_page
         end_idx = start_idx + items_per_page
-        leaderboard_page = leaderboard_with_users[start_idx:end_idx]
+        page_entries = leaderboard_data[start_idx:end_idx]
+        top3_entries = leaderboard_data[:3]
+
+        # 필요한 사용자만 일괄 조회 (N+1 방지)
+        needed_ids = {str(e['_id']) for e in page_entries} | {str(e['_id']) for e in top3_entries}
+        users_by_id = get_users_by_ids(list(needed_ids))
+
+        def build_entry(entry, rank):
+            return {
+                'rank': rank,
+                'user_id': entry['_id'],
+                'user': users_by_id.get(str(entry['_id'])),
+                'total_distance': entry['total_distance'],
+                'count': entry['count'],
+                'average_distance': entry['average_distance'],
+            }
+
+        leaderboard_page = [build_entry(e, start_idx + i + 1) for i, e in enumerate(page_entries)]
+        leaderboard_top3 = [build_entry(e, i + 1) for i, e in enumerate(top3_entries)]
 
         # 전체 통계 (항상 전체 시간 기준으로 표시)
         from database.mongodb import get_global_stats
@@ -206,32 +212,14 @@ def leaderboard():
         # 반별 리더보드 조회
         class_leaderboard = get_class_leaderboard(start_date=start_date)
 
-        # 페이지 번호 리스트 생성 (최대 5개 표시, 현재 페이지 기준)
-        page_numbers = []
-        start_page = max(1, page - 2)
-        end_page = min(total_pages, page + 2)
-
-        if start_page > 1:
-            page_numbers.append(1)
-            if start_page > 2:
-                page_numbers.append('...')
-
-        for p in range(start_page, end_page + 1):
-            page_numbers.append(p)
-
-        if end_page < total_pages:
-            if end_page < total_pages - 1:
-                page_numbers.append('...')
-            page_numbers.append(total_pages)
-
         return render_template(
             'leaderboard.html',
             leaderboard=leaderboard_page,
-            leaderboard_all=leaderboard_with_users,
+            leaderboard_all=leaderboard_top3,
             stats=global_stats,
             current_page=page,
             total_pages=total_pages,
-            page_numbers=page_numbers,
+            page_numbers=build_page_numbers(page, total_pages),
             current_filter=current_filter,
             current_type=current_type,
             class_leaderboard=class_leaderboard,
