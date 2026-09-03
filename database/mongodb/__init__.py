@@ -32,6 +32,17 @@ from .record import (
     get_class_leaderboard,
 )
 
+# MongoDB 문의 모듈 exports
+from .inquiry import (
+    get_thread,
+    send_user_message,
+    send_developer_reply,
+    get_all_threads,
+    get_thread_count,
+    mark_read_by_developer,
+    mark_read_by_user,
+)
+
 __all__ = [
     # User 함수
     "get_user",
@@ -61,4 +72,12 @@ __all__ = [
     "get_global_stats",
     "get_leaderboard",
     "get_class_leaderboard",
+    # Inquiry 함수
+    "get_thread",
+    "send_user_message",
+    "send_developer_reply",
+    "get_all_threads",
+    "get_thread_count",
+    "mark_read_by_developer",
+    "mark_read_by_user",
 ]

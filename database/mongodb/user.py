@@ -204,6 +204,7 @@ def create_user(user_data: dict) -> dict:
         "student_id": user_data.get("student_id"),
         "role": user_data.get("role"),
         "is_admin": user_data.get("is_admin", False),
+        "is_developer": user_data.get("is_developer", False),
         "name": user_data.get("name", ""),
         "profile_image": user_data.get("profile_image", ""),
         "created_at": datetime.utcnow(),
@@ -250,8 +251,8 @@ def update_user(user_id: str, update_data: dict) -> dict:
     _validate_credentials()
 
     try:
-        # _id, password, is_admin은 수정 불가
-        for blocked in ("_id", "password", "is_admin"):
+        # _id, password, is_admin, is_developer는 수정 불가
+        for blocked in ("_id", "password", "is_admin", "is_developer"):
             update_data.pop(blocked, None)
 
         # updated_at 자동 설정

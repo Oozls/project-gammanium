@@ -9,12 +9,13 @@ from database.mongodb import get_user
 class User(UserMixin):
     """Flask-Login과 호환되는 User 클래스"""
 
-    def __init__(self, user_id, username, email, is_admin=False, profile_image='', student_id=None, role=None, bio='', name=''):
+    def __init__(self, user_id, username, email, is_admin=False, is_developer=False, profile_image='', student_id=None, role=None, bio='', name=''):
         self.id = user_id  # MongoDB ObjectId (문자열)
         self.username = username
         self.name = name  # 실명
         self.email = email
         self.is_admin = is_admin
+        self.is_developer = is_developer
         self.profile_image = profile_image
         self.student_id = student_id  # 학번
         self.role = role  # 'student' or 'teacher'
@@ -43,6 +44,7 @@ class User(UserMixin):
                     username=user_data['username'],
                     email=user_data['email'],
                     is_admin=user_data.get('is_admin', False),
+                    is_developer=user_data.get('is_developer', False),
                     profile_image=user_data.get('profile_image', ''),
                     student_id=user_data.get('student_id'),
                     role=user_data.get('role'),

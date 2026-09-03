@@ -11,6 +11,8 @@ from .user import user_bp
 from .record import record_bp
 from .admin import admin_bp
 from .settings import settings_bp
+from .inquiry import inquiry_bp
+from .developer import developer_bp
 from .user_model import User
 
 load_dotenv()
@@ -62,6 +64,8 @@ app.register_blueprint(user_bp)
 app.register_blueprint(record_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(settings_bp)
+app.register_blueprint(inquiry_bp)
+app.register_blueprint(developer_bp)
 
 @app.route('/')
 def main_page():

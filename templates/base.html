@@ -240,6 +240,23 @@
                         관리자 패널
                       </a>
                     {% endif %}
+                    {% if current_user.is_developer %}
+                      <a href="{{ url_for('developer.inquiry_list') }}" style="
+                        display: flex;
+                        align-items: center;
+                        gap: var(--space-3);
+                        padding: var(--space-3);
+                        text-decoration: none;
+                        color: var(--color-accent);
+                        border-radius: var(--radius-md);
+                        transition: background-color var(--transition-fast);
+                        font-size: var(--font-size-sm);
+                        font-weight: var(--font-weight-medium);
+                      " onmouseenter="this.style.backgroundColor='rgba(156, 125, 233, 0.1)'" onmouseleave="this.style.backgroundColor='transparent'">
+                        <i data-feather="message-square" style="width: 18px; height: 18px;"></i>
+                        문의함
+                      </a>
+                    {% endif %}
                     <a href="{{ url_for('user.logout') }}" style="
                       display: flex;
                       align-items: center;
@@ -427,6 +444,65 @@
   ============================================================= -->
   <div id="toast-container" class="toast-container"></div>
 
+  {% if current_user.is_authenticated %}
+  <!-- ============================================================
+       문의하기 위젯 (우측 하단 플로팅 버튼)
+  ============================================================= -->
+  <button id="inquiry-toggle-btn" aria-label="문의하기" onclick="toggleInquiryPanel()" style="
+    position: fixed;
+    right: var(--space-6);
+    bottom: var(--space-6);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999;
+  ">
+    <i data-feather="message-circle"></i>
+  </button>
+
+  <div id="inquiry-panel" style="
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    right: var(--space-6);
+    bottom: calc(var(--space-6) + 68px);
+    width: 340px;
+    max-width: calc(100vw - var(--space-8));
+    height: 460px;
+    max-height: calc(100vh - 140px);
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    overflow: hidden;
+  ">
+    <div style="padding: var(--space-4); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; background: var(--color-surface-warm); flex-shrink: 0;">
+      <strong style="font-size: var(--font-size-sm);">문의하기</strong>
+      <button type="button" onclick="toggleInquiryPanel()" style="background: none; border: none; cursor: pointer; color: var(--color-text-secondary); display: flex;">
+        <i data-feather="x" style="width: 18px; height: 18px;"></i>
+      </button>
+    </div>
+    <div id="inquiry-messages" style="flex: 1; overflow-y: auto; padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3);">
+      <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center;">궁금하신 점을 남겨주시면 개발자가 확인 후 답변드립니다.</p>
+    </div>
+    <form id="inquiry-form" style="display: flex; gap: var(--space-2); padding: var(--space-3); border-top: 1px solid var(--color-border); flex-shrink: 0;">
+      <input type="text" id="inquiry-input" placeholder="메시지를 입력하세요" maxlength="1000" autocomplete="off" style="flex: 1; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); font-size: var(--font-size-sm);">
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i data-feather="send"></i>
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
   <!-- ============================================================
        SCRIPTS
   ============================================================= -->
@@ -539,6 +615,90 @@
         }
       });
     });
+
+    {% if current_user.is_authenticated %}
+    // 문의하기 위젯
+    let inquiryLoaded = false;
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderInquiryMessages(messages) {
+      const container = document.getElementById('inquiry-messages');
+      if (!messages || messages.length === 0) {
+        container.innerHTML = '<p style="color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center;">궁금하신 점을 남겨주시면 개발자가 확인 후 답변드립니다.</p>';
+        return;
+      }
+      container.innerHTML = messages.map(m => `
+        <div style="align-self: ${m.sender === 'developer' ? 'flex-start' : 'flex-end'}; max-width: 85%;">
+          <div style="
+            background: ${m.sender === 'developer' ? 'var(--color-surface-light)' : 'var(--color-primary)'};
+            color: ${m.sender === 'developer' ? 'var(--color-text)' : 'white'};
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            white-space: pre-wrap;
+            word-break: break-word;
+          ">${escapeHtml(m.text)}</div>
+          <div style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: 2px; text-align: ${m.sender === 'developer' ? 'left' : 'right'};">
+            ${m.sender === 'developer' ? '개발자' : '나'} · ${m.created_at}
+          </div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function loadInquiryThread() {
+      fetch('{{ url_for("inquiry.get_my_thread") }}')
+        .then(r => r.json())
+        .then(data => {
+          inquiryLoaded = true;
+          renderInquiryMessages(data.messages);
+        })
+        .catch(() => {});
+    }
+
+    function toggleInquiryPanel() {
+      const panel = document.getElementById('inquiry-panel');
+      const isOpen = panel.style.display === 'flex';
+      panel.style.display = isOpen ? 'none' : 'flex';
+      feather.replace();
+      if (!isOpen && !inquiryLoaded) {
+        loadInquiryThread();
+      }
+    }
+
+    document.getElementById('inquiry-form')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const input = document.getElementById('inquiry-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.disabled = true;
+
+      fetch('{{ url_for("inquiry.post_my_message") }}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: text}),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.messages) {
+            renderInquiryMessages(data.messages);
+            input.value = '';
+          } else if (data.error) {
+            showToast(data.error, 'error');
+          }
+        })
+        .catch(() => showToast('메시지 전송에 실패했습니다', 'error'))
+        .finally(() => {
+          input.disabled = false;
+          input.focus();
+        });
+    });
+    {% endif %}
 
     // Profile popover toggle (click only)
     (function () {

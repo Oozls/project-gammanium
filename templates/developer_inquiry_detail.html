@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}문의 상세 - 사제동행 런닝 프로그램{% endblock %}
+
+{% block content %}
+
+<!-- ===========================================================
+     DEVELOPER INQUIRY DETAIL PAGE
+=========================================================== -->
+<section class="section" style="padding-top: calc(var(--space-20) + var(--space-6)); padding-bottom: var(--space-20);">
+  <div class="container container-md">
+
+    <!-- Back button -->
+    <a href="{{ url_for('developer.inquiry_list') }}" style="display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-primary); text-decoration: none; margin-bottom: var(--space-6); font-weight: var(--font-weight-medium);">
+      <i data-feather="chevron-left" style="width: 18px; height: 18px;"></i>
+      문의함으로
+    </a>
+
+    <!-- Header -->
+    <div style="margin-bottom: var(--space-8);">
+      <h1 style="margin-bottom: var(--space-2);">{{ inquiry_user.username if inquiry_user else '알 수 없음' }}님의 문의</h1>
+      <p class="text-md" style="color: var(--color-text-secondary);">
+        {{ inquiry_user.email if inquiry_user else '' }}
+      </p>
+    </div>
+
+    <!-- Thread card -->
+    <div class="card" style="padding: 0; overflow: hidden;">
+
+      <!-- Messages -->
+      <div style="padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); max-height: 480px; overflow-y: auto;">
+        {% for message in thread.messages %}
+          <div style="align-self: {{ 'flex-start' if message.sender == 'developer' else 'flex-end' }}; max-width: 75%;">
+            <div style="
+              background: {{ 'var(--color-surface-light)' if message.sender == 'developer' else 'var(--color-primary)' }};
+              color: {{ 'var(--color-text)' if message.sender == 'developer' else 'white' }};
+              padding: var(--space-3) var(--space-4);
+              border-radius: var(--radius-md);
+              font-size: var(--font-size-sm);
+              white-space: pre-wrap;
+              word-break: break-word;
+            ">{{ message.text }}</div>
+            <div style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-1); text-align: {{ 'left' if message.sender == 'developer' else 'right' }};">
+              {{ message.name }} · {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Reply form -->
+      <form method="POST" action="{{ url_for('developer.inquiry_reply', user_id=thread.user_id) }}" style="display: flex; gap: var(--space-3); padding: var(--space-4); border-top: 1px solid var(--color-border);">
+        <textarea name="text" required maxlength="1000" placeholder="답장을 입력하세요" class="form-textarea" style="flex: 1; min-height: 60px;"></textarea>
+        <button type="submit" class="btn btn-primary" style="align-self: flex-end;">
+          <i data-feather="send"></i>
+          보내기
+        </button>
+      </form>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  feather.replace();
+</script>
+
+{% endblock %}
