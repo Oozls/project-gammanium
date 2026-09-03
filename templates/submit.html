@@ -153,6 +153,22 @@
   </div>
 </section>
 
+<!-- ============================================================
+     GPS 증거 안내 모달 (기록 등록 페이지 진입 시 표시)
+============================================================= -->
+<div id="gpsReminderModal" style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 1000;">
+  <div class="card" style="max-width: 420px; margin: auto; padding: var(--space-8);">
+    <h3 style="margin-bottom: var(--space-4);">📍 기록 등록 안내</h3>
+    <p style="color: var(--color-text-secondary); margin-bottom: var(--space-6); line-height: 1.6;">
+      런닝 기록을 등록할 때는 GPS 앱의 경로 지도가 보이는 스크린샷을 증거 이미지로 함께 첨부해주세요.
+      지도 캡처가 없으면 기록이 거절될 수 있습니다.
+    </p>
+    <button type="button" class="btn btn-primary btn-lg btn-full" style="justify-content: center;" onclick="document.getElementById('gpsReminderModal').style.display='none';">
+      확인했습니다
+    </button>
+  </div>
+</div>
+
 <script>
   function handleFileSelect(input) {
     const textEl = document.getElementById('upload-text');

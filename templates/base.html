@@ -428,22 +428,6 @@
   <div id="toast-container" class="toast-container"></div>
 
   <!-- ============================================================
-       GPS 증거 안내 모달 (신규 접속 또는 1시간 이상 경과 후 재접속 시)
-  ============================================================= -->
-  <div id="gpsReminderModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 1000;">
-    <div class="card" style="max-width: 420px; margin: auto; padding: var(--space-8);">
-      <h3 style="margin-bottom: var(--space-4);">📍 기록 등록 안내</h3>
-      <p style="color: var(--color-text-secondary); margin-bottom: var(--space-6); line-height: 1.6;">
-        런닝 기록을 등록할 때는 GPS 앱의 경로 지도가 보이는 스크린샷을 증거 이미지로 함께 첨부해주세요.
-        지도 캡처가 없으면 기록이 거절될 수 있습니다.
-      </p>
-      <button type="button" class="btn btn-primary btn-lg btn-full" style="justify-content: center;" onclick="document.getElementById('gpsReminderModal').style.display='none';">
-        확인했습니다
-      </button>
-    </div>
-  </div>
-
-  <!-- ============================================================
        SCRIPTS
   ============================================================= -->
   <script>
@@ -555,25 +539,6 @@
         }
       });
     });
-
-    // GPS 증거 안내: 신규 접속 또는 마지막 접속 후 1시간 이상 지나면 표시
-    (function() {
-      const STORAGE_KEY = 'lastVisitAt';
-      const ONE_HOUR_MS = 60 * 60 * 1000;
-      let lastVisit = null;
-      try {
-        lastVisit = localStorage.getItem(STORAGE_KEY);
-        localStorage.setItem(STORAGE_KEY, String(Date.now()));
-      } catch (e) {}
-
-      const shouldShow = !lastVisit || (Date.now() - parseInt(lastVisit, 10)) > ONE_HOUR_MS;
-      if (shouldShow) {
-        document.addEventListener('DOMContentLoaded', function() {
-          const modal = document.getElementById('gpsReminderModal');
-          if (modal) modal.style.display = 'flex';
-        });
-      }
-    })();
 
     // Profile popover toggle (click only)
     (function () {

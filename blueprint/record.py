@@ -223,6 +223,7 @@ def leaderboard():
             current_filter=current_filter,
             current_type=current_type,
             class_leaderboard=class_leaderboard,
+            total_participants=total_count,
         )
 
     except Exception as e:
@@ -236,6 +237,7 @@ def leaderboard():
             total_pages=1,
             page_numbers=[1],
             current_filter='all',
+            total_participants=0,
         )
 
 
