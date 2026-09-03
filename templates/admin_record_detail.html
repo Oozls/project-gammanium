@@ -65,7 +65,7 @@
                 </p>
                 {% if user and user.created_at %}
                   <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">
-                    가입일: {{ user.created_at.strftime('%Y-%m-%d') }}
+                    가입일: {{ user.created_at | kst('%Y-%m-%d') }}
                   </p>
                 {% endif %}
               </div>
@@ -128,11 +128,7 @@
             <div>
               <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2); font-weight: var(--font-weight-medium);">제출 시간</p>
               <p style="font-size: var(--font-size-md); color: var(--color-text); font-weight: var(--font-weight-medium);">
-                {% if record.submitted_at %}
-                  {{ record.submitted_at.strftime('%Y-%m-%d %H:%M') }}
-                {% else %}
-                  N/A
-                {% endif %}
+                {{ record.submitted_at | kst }}
               </p>
             </div>
 
@@ -140,7 +136,7 @@
               <div>
                 <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2); font-weight: var(--font-weight-medium);">검토 시간</p>
                 <p style="font-size: var(--font-size-md); color: var(--color-text); font-weight: var(--font-weight-medium);">
-                  {{ record.reviewed_at.strftime('%Y-%m-%d %H:%M') }}
+                  {{ record.reviewed_at | kst }}
                 </p>
               </div>
             {% endif %}
@@ -303,7 +299,7 @@
               {% endif %}
               {% if record.reviewed_at %}
                 <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                  {{ record.reviewed_at.strftime('%Y-%m-%d %H:%M') }}
+                  {{ record.reviewed_at | kst }}
                 </p>
               {% endif %}
             </div>

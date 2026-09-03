@@ -107,11 +107,11 @@
             </div>
             <div>
               <p style="margin: 0 0 var(--space-1) 0; color: var(--color-text-muted);">가입일</p>
-              <p style="margin: 0; color: var(--color-text);">{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else '-' }}</p>
+              <p style="margin: 0; color: var(--color-text);">{{ user.created_at | kst }}</p>
             </div>
             <div>
               <p style="margin: 0 0 var(--space-1) 0; color: var(--color-text-muted);">마지막 수정</p>
-              <p style="margin: 0; color: var(--color-text);">{{ user.updated_at.strftime('%Y-%m-%d %H:%M') if user.updated_at else '-' }}</p>
+              <p style="margin: 0; color: var(--color-text);">{{ user.updated_at | kst }}</p>
             </div>
           </div>
         </div>

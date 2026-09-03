@@ -2,6 +2,7 @@
 Flask-Login을 사용한 문의 위젯 관련 라우트 (사용자용)
 """
 
+from datetime import timedelta, timezone
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
 from database.mongodb import get_thread, send_user_message, mark_read_by_user
@@ -9,6 +10,7 @@ from database.mongodb import get_thread, send_user_message, mark_read_by_user
 inquiry_bp = Blueprint('inquiry', __name__, url_prefix='/inquiry')
 
 MAX_MESSAGE_LENGTH = 1000
+KST = timezone(timedelta(hours=9))
 
 
 def _serialize_thread(thread):
@@ -20,7 +22,7 @@ def _serialize_thread(thread):
                 'sender': m['sender'],
                 'name': m['name'],
                 'text': m['text'],
-                'created_at': m['created_at'].strftime('%Y-%m-%d %H:%M'),
+                'created_at': m['created_at'].replace(tzinfo=timezone.utc).astimezone(KST).strftime('%Y-%m-%d %H:%M'),
             }
             for m in thread.get('messages', [])
         ]

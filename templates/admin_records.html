@@ -159,11 +159,7 @@
                     {{ record.date }}
                   </td>
                   <td style="padding: var(--space-4); color: var(--color-text-secondary);">
-                    {% if record.submitted_at %}
-                      {{ record.submitted_at.strftime('%Y-%m-%d %H:%M') }}
-                    {% else %}
-                      N/A
-                    {% endif %}
+                    {{ record.submitted_at | kst }}
                   </td>
                   <td style="padding: var(--space-4); text-align: center;">
                     {% if record.status == 'pending' %}

@@ -64,22 +64,14 @@
             <div>
               <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2); font-weight: var(--font-weight-medium);">제출 시간</p>
               <p style="font-size: var(--font-size-md); color: var(--color-text); font-weight: var(--font-weight-medium);">
-                {% if record.submitted_at %}
-                  {{ record.submitted_at.strftime('%Y-%m-%d %H:%M') if record.submitted_at else 'N/A' }}
-                {% else %}
-                  N/A
-                {% endif %}
+                {{ record.submitted_at | kst }}
               </p>
             </div>
 
             <div>
               <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: var(--space-2); font-weight: var(--font-weight-medium);">승인 시간</p>
               <p style="font-size: var(--font-size-md); color: var(--color-text); font-weight: var(--font-weight-medium);">
-                {% if record.reviewed_at %}
-                  {{ record.reviewed_at.strftime('%Y-%m-%d %H:%M') if record.reviewed_at else 'N/A' }}
-                {% else %}
-                  N/A
-                {% endif %}
+                {{ record.reviewed_at | kst }}
               </p>
             </div>
 

@@ -62,7 +62,7 @@
                   {% endif %}
                 </td>
                 <td style="padding: var(--space-4); color: var(--color-text-secondary); font-size: var(--font-size-sm);">
-                  {{ thread.updated_at.strftime('%Y-%m-%d %H:%M') if thread.updated_at else '' }}
+                  {{ thread.updated_at | kst }}
                 </td>
                 <td style="padding: var(--space-4); text-align: center;">
                   {% if thread.unread_by_developer %}

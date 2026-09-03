@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from os import getenv
 from html import escape
+from datetime import timedelta, timezone
 import sys
 
 from .user import user_bp
@@ -78,25 +79,18 @@ def request_entity_too_large(e):
     return redirect(request.referrer or url_for('main_page')), 413
 
 
+# DB에는 UTC(naive)로 저장되므로 화면 표시 시 한국 표준시로 변환
+KST = timezone(timedelta(hours=9))
 
 
-
-# from datetime import datetime, timedelta, timezone
-
-# KST = timezone(timedelta(hours=9))
-# def unix_to_date(t):
-#     date = datetime.fromtimestamp(t)
-#     today = datetime.today()
-#     diff = today - date
-
-#     if diff.days == 0:
-#         return datetime.fromtimestamp(t, tz=KST).strftime('%H:%M')
-#     else:
-#         return datetime.fromtimestamp(t, tz=KST).strftime('%Y.%m.%d')
-
-# app.jinja_env.filters["unix_to_date"] = unix_to_date
-
-
+@app.template_filter('kst')
+def format_kst(value, fmt='%Y-%m-%d %H:%M'):
+    """UTC datetime을 한국 표준시 문자열로 변환합니다."""
+    if not value:
+        return '-'
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(KST).strftime(fmt)
 
 
 # def id_to_username(id):

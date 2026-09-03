@@ -41,7 +41,7 @@
               word-break: break-word;
             ">{{ message.text }}</div>
             <div style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-1); text-align: {{ 'left' if message.sender == 'developer' else 'right' }};">
-              {{ message.name }} · {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}
+              {{ message.name }} · {{ message.created_at | kst }}
             </div>
           </div>
         {% endfor %}
