@@ -62,7 +62,8 @@ def login():
                 bio=user_data.get('bio', ''),
                 name=user_data.get('name', ''),
             )
-            login_user(user)
+            remember_me = bool(request.form.get('remember_me'))
+            login_user(user, remember=remember_me)
 
             # 마이그레이션: 학번/역할 없으면 프로필 완성 페이지로 리다이렉트
             if not user_data.get('student_id') or not user_data.get('role'):
