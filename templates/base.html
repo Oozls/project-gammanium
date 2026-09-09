@@ -501,6 +501,35 @@
       </button>
     </form>
   </div>
+
+  <!-- ============================================================
+       문의 기능 안내 팝업 (최초 1회만 표시)
+  ============================================================= -->
+  <div id="inquiryNoticeModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 1000;">
+    <div class="card" style="max-width: 380px; margin: auto; padding: var(--space-8); text-align: center;">
+      <div style="
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+      ">
+        <i data-feather="message-circle" style="width: 26px; height: 26px;"></i>
+      </div>
+      <h3 style="margin-bottom: var(--space-3);">문의하기 기능 안내</h3>
+      <p style="color: var(--color-text-secondary); margin-bottom: var(--space-6); line-height: 1.6;">
+        화면 우측 하단의 <strong>말풍선 버튼</strong>을 누르면 개발자에게 궁금한 점이나 오류를 바로 문의할 수 있어요.
+        보내주신 문의는 개발자가 확인 후 답변해드립니다.
+      </p>
+      <button type="button" class="btn btn-primary btn-lg btn-full" style="justify-content: center;" onclick="closeInquiryNotice()">
+        확인했습니다
+      </button>
+    </div>
+  </div>
   {% endif %}
 
   <!-- ============================================================
@@ -697,6 +726,26 @@
           input.disabled = false;
           input.focus();
         });
+    });
+
+    // 문의 기능 안내 팝업 (최초 1회만)
+    function closeInquiryNotice() {
+      const modal = document.getElementById('inquiryNoticeModal');
+      if (modal) modal.style.display = 'none';
+      try {
+        localStorage.setItem('inquiryNoticeSeen', '1');
+      } catch (e) {}
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      let alreadySeen = false;
+      try {
+        alreadySeen = localStorage.getItem('inquiryNoticeSeen') === '1';
+      } catch (e) {}
+      if (!alreadySeen) {
+        const modal = document.getElementById('inquiryNoticeModal');
+        if (modal) modal.style.display = 'flex';
+      }
     });
     {% endif %}
 
