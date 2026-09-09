@@ -28,7 +28,7 @@ if not secret_key:
 app.config['SECRET_KEY'] = secret_key
 
 app.config['SESSION_TYPE'] = 'filesystem'
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 app.template_folder = "../templates"
 app.static_folder = "../static"
 
@@ -75,7 +75,7 @@ def main_page():
 @app.errorhandler(413)
 def request_entity_too_large(e):
     from flask import flash
-    flash('파일 크기가 너무 큽니다 (최대 10MB)', 'error')
+    flash('파일 크기가 너무 큽니다 (최대 50MB)', 'error')
     return redirect(request.referrer or url_for('main_page')), 413
 
 
